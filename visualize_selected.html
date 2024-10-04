@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trip Planning Tree Visualization</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            overflow: hidden;
+        }
+        #input-container {
+            margin-bottom: 20px;
+        }
+        #chart { 
+            width: 100vw; 
+            height: 90vh; 
+            display: flex;
+            flex-direction: column;
+        }
+        .node circle {
+            fill: #fff;
+            stroke: steelblue;
+            stroke-width: 3px;
+        }
+        .node text { 
+            font: 12px sans-serif; 
+        }
+        .link {
+            fill: none;
+            stroke: #ccc;
+            stroke-width: 2px;
+        }
+        .tooltip {
+            position: absolute;
+            text-align: left;
+            padding: 10px;
+            font: 12px sans-serif;
+            background: lightsteelblue;
+            border: 0px;
+            border-radius: 8px;
+            pointer-events: none;
+            max-width: 300px;
+            white-space: pre-wrap;
+        }
+        .prompt-box, .response-box {
+            background: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 12px;
+            overflow-y: auto;
+            max-height: 150px;
+            margin: 10px;
+            flex: 0 0 auto;
+        }
+        #tree-container {
+            flex: 1;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div id="input-container">
+        <input type="number" id="index-input" placeholder="Example index" min="0" value="0">
+        <button onclick="visualize()">Visualize</button>
+    </div>
+    <div id="chart">
+        <div id="prompt-container" class="prompt-box"></div>
+        <div id="tree-container"></div>
+        <div id="response-container" class="response-box"></div>
+    </div>
+    <script>
+        // Embedded JSON data
+        const jsonData = [
+    {
+        "content": "A swimming pool is circular with a $40-\\mathrm{ft}$ diameter. The depth is constant along east-west lines and increases linearly from $2 \\mathrm{ft}$ at the south end to $7 \\mathrm{ft}$ at the north end. Find the volume of water in the pool. Answer in this unit:  $\\mathrm{ft}^3$",
+        "solution": "Step 1: Identify the key information provided in the problem. The pool is circular with a 40-ft diameter, and the depth increases linearly from 2 ft at the south end to 7 ft at the north end.\nStep 2: Determine the average depth of the pool by taking the mean of the minimum and maximum depths. The average depth is (2 ft + 7 ft) / 2 = 4.5 ft.\nStep 3: Calculate the radius of the circular pool by dividing the diameter by 2. The radius is 40 ft / 2 = 20 ft.\nStep 4: Set up the volume calculation by using the formula V = \u03c0r\u00b2h, where r is the radius and h is the average depth we calculated in Steps 2 and 3.\n",
+        "summary": "The final answer is $5654.87$",
+        "accurate": true,
+        "real_answer": "5654.86677646",
+        "trajectory_data": {
+            "question_id": 6,
+            "problem_prompt": "A swimming pool is circular with a $40-\\mathrm{ft}$ diameter. The depth is constant along east-west lines and increases linearly from $2 \\mathrm{ft}$ at the south end to $7 \\mathrm{ft}$ at the north end. Find the volume of water in the pool. Answer in this unit:  $\\mathrm{ft}^3$",
+            "algorithm": "bfs",
+            "branch": 5,
+            "select_branch": 5,
+            "max_depth": 8,
+            "end_gate": 0.98,
+            "prune_depth": 3,
+            "sub_low": 0.5,
+            "trajectory": [
+                {
+                    "question_id": "6",
+                    "node_id": "140553745040544",
+                    "parent_id": null,
+                    "content": "",
+                    "current_step": "",
+                    "depth": 0,
+                    "value": 0.0,
+                    "state": "root",
+                    "visit_sequence": 0,
+                    "is_final": false
+                },
+                {
+                    "question_id": "6",
+                    "node_id": "140553746854400",
+                    "parent_id": "140553745040544",
+                    "content": "Step 1: Here are 5 different reasonable next steps based on the given problem:\n",
+                    "current_step": "Step 1: Here are 5 different reasonable next steps based on the given problem:\n",
+                    "depth": 1,
+                    "value": 0.0,
+                    "state": "expanded",
+                    "visit_sequence": 1,
+                    "is_final": false
+                },
+                {
+                    "question_id": "6",
+                    "node_id": "140553745208512",
+                    "parent_id": "140553745040544",
+                    "content": "Step 1: Identify the key information provided in the problem. The pool is circular with a 40-ft diameter, and the depth increases linearly from 2 ft at the south end to 7 ft at the north end.\n",
+                    "current_step": "Step 1: Identify the key information provided in the problem. The pool is circular with a 40-ft diameter, and the depth increases linearly from 2 ft at the south end to 7 ft at the north end.\n",
+                    "depth": 1,
+                    "value": 0.3,
+                    "state": "expanded",
+                    "visit_sequence": 2,
+                    "is_final": false
+                },
+                {
+                    "question_id": "6",
+                    "node_id": "140553751064800",
+                    "parent_id": "140553745040544",
+                    "content": "Step 1: Calculate the radius of the circular pool. Since the diameter is 40 ft, the radius is half of that, which is 20 ft.\n",
+                    "current_step": "Step 1: Calculate the radius of the circular pool. Since the diameter is 40 ft, the radius is half of that, which is 20 ft.\n",
+                    "depth": 1,
+                    "value": 0.2,
+                    "state": "expanded",
+                    "visit_sequence": 3,
+                    "is_final": false
+                },
+                {
+                    "question_id": "6",
+                    "node_id": "140553746156720",
+                    "parent_id": "140553745040544",
+                    "content": "Step 1: Recognize that this problem involves calculating the volume of a circular cylinder with a non-uniform depth. We'll need to use integration to solve this problem.\n",
+                    "current_step": "Step 1: Recognize that this problem involves calculating the volume of a circular cylinder with a non-uniform depth. We'll need to use integration to solve this problem.\n",
+                    "depth": 1,
+                    "value": 0.3,
+                    "state": "expanded",
+                    "visit_sequence": 4,
+                    "is_final": false
+                },
+                {
+                    "question_id": "6",
+                    "node_id": "140553741183136",
+                    "parent_id": "140553745040544",
+                    "content": "Step 1: Visualize the pool as a series of thin circular disks stacked from south to north, each with a slightly increasing depth. This will help us set up the integral for the volume calculation.\n",
+                    "current_step": "Step 1: Visualize the pool as a series of thin circular disks stacked from south to north, each with a slightly increasing depth. This will help us set up the integral for the volume calculation.\n",
+                    "depth": 1,
+                    "value": 0.3,
+                    "state": "expanded",
+                    "visit_sequence": 5,
+                    "is_final": false
+                },
+                {
+                    "question_id": "6",
+                    "node_id": "140553751380672",
+                    "parent_id": "140553745040544",
+                    "content": "Step 1: Determine the function that describes the depth of the pool at any point along its north-south axis. We can use a linear function to represent this, as the depth increases linearly from 2 ft to 7 ft over the diameter of 40 ft.\n",
+                    "current_step": "Step 1: Determine the function that describes the depth of the pool at any point along its north-south axis. We can use a linear function to represent this, as the depth increases linearly from 2 ft to 7 ft over the diameter of 40 ft.\n",
+                    "depth": 1,
+                    "value": 0.3,
+                    "state": "expanded",
+                    "visit_sequence": 6,
+                    "is_final": false
+                },
+                {
+                    "question_id": "6",
+                    "node_id": "140553736021792",
+                    "parent_id": "140553745208512",
+                    "content": "Step 1: Identify the key information provided in the problem. The pool is circular with a 40-ft diameter, and the depth increases linearly from 2 ft at the south end to 7 ft at the north end.\nStep 2: Calculate the radius of the circular pool by dividing the diameter by 2. The radius is 40 ft / 2 = 20 ft.\n",
+                    "current_step": "Step 2: Calculate the radius of the circular pool by dividing the diameter by 2. The radius is 40 ft / 2 = 20 ft.\n",
+                    "depth": 2,
+                    "value": 0.3,
+                    "state": "expanded",
+                    "visit_sequence": 7,
+                    "is_final": false
+                },
+                {
+                    "question_id": "6",
+                    "node_id": "140553746564784",
+                    "parent_id": "140553745208512",
+                    "content": "Step 1: Identify the key information provided in the problem. The pool is circular with a 40-ft diameter, and the depth increases linearly from 2 ft at the south end to 7 ft at the north end.\nStep 2: Determine the average depth of the pool by taking the mean of the minimum and maximum depths. The average depth is (2 ft + 7 ft) / 2 = 4.5 ft.\n",
+                    "current_step": "Step 2: Determine the average depth of the pool by taking the mean of the minimum and maximum depths. The average depth is (2 ft + 7 ft) / 2 = 4.5 ft.\n",
+                    "depth": 2,
+                    "value": 0.4,
+                    "state": "expanded",
+                    "visit_sequence": 8,
+                    "is_final": false
+                },
+                {
+                    "question_id": "6",
+                    "node_id": "140553736737984",
+                    "parent_id": "140553745208512",
+                    "content": "Step 1: Identify the key information provided in the problem. The pool is circular with a 40-ft diameter, and the depth increases linearly from 2 ft at the south end to 7 ft at the north end.\nStep 2: Visualize the pool as a cylinder with a circular base and an average depth. We can use the formula for the volume of a cylinder: V = \u03c0r\u00b2h, where r is the radius and h is the height (average depth in this case).\n",
+                    "current_step": "Step 2: Visualize the pool as a cylinder with a circular base and an average depth. We can use the formula for the volume of a cylinder: V = \u03c0r\u00b2h, where r is the radius and h is the height (average depth in this case).\n",
+                    "depth": 2,
+                    "value": 0.4,
+                    "state": "expanded",
+                    "visit_sequence": 9,
+                    "is_final": false
+                },
+                {
+                    "question_id": "6",
+                    "node_id": "140553736438848",
+                    "parent_id": "140553745208512",
+                    "content": "Step 1: Identify the key information provided in the problem. The pool is circular with a 40-ft diameter, and the depth increases linearly from 2 ft at the south end to 7 ft at the north end.\nStep 2: Consider the pool as a series of thin vertical slices from south to north, each with a slightly different depth. This approach will lead us to use integration to calculate the volume.\n",
+                    "current_step": "Step 2: Consider the pool as a series of thin vertical slices from south to north, each with a slightly different depth. This approach will lead us to use integration to calculate the volume.\n",
+                    "depth": 2,
+                    "value": 0.3,
+                    "state": "expanded",
+                    "visit_sequence": 10,
+                    "is_final": false
+                },
+                {
+                    "question_id": "6",
+                    "node_id": "140553738650208",
+                    "parent_id": "140553745208512",
+                    "content": "Step 1: Identify the key information provided in the problem. The pool is circular with a 40-ft diameter, and the depth increases linearly from 2 ft at the south end to 7 ft at the north end.\nStep 2: Draw a diagram of the pool's cross-section, showing how the depth increases linearly from south to north. This will help us set up a function for the depth in terms of the position along the north-south axis.\n",
+                    "current_step": "Step 2: Draw a diagram of the pool's cross-section, showing how the depth increases linearly from south to north. This will help us set up a function for the depth in terms of the position along the north-south axis.\n",
+                    "depth": 2,
+                    "value": 0.3,
+                    "state": "expanded",
+                    "visit_sequence": 11,
+                    "is_final": false
+                },
+                {
+                    "question_id": "6",
+                    "node_id": "140553736207968",
+                    "parent_id": "140553746564784",
+                    "content": "Step 1: Identify the key information provided in the problem. The pool is circular with a 40-ft diameter, and the depth increases linearly from 2 ft at the south end to 7 ft at the north end.\nStep 2: Determine the average depth of the pool by taking the mean of the minimum and maximum depths. The average depth is (2 ft + 7 ft) / 2 = 4.5 ft.\nStep 3: Calculate the radius of the circular pool by dividing the diameter by 2. The radius is 40 ft / 2 = 20 ft.\n",
+                    "current_step": "Step 3: Calculate the radius of the circular pool by dividing the diameter by 2. The radius is 40 ft / 2 = 20 ft.\n",
+                    "depth": 3,
+                    "value": 0.7,
+                    "state": "expanded",
+                    "visit_sequence": 12,
+                    "is_final": false
+                },
+                {
+                    "question_id": "6",
+                    "node_id": "140553746156240",
+                    "parent_id": "140553746564784",
+                    "content": "Step 1: Identify the key information provided in the problem. The pool is circular with a 40-ft diameter, and the depth increases linearly from 2 ft at the south end to 7 ft at the north end.\nStep 2: Determine the average depth of the pool by taking the mean of the minimum and maximum depths. The average depth is (2 ft + 7 ft) / 2 = 4.5 ft.\nStep 3: Recall the formula for the volume of a cylinder, which is V = \u03c0r\u00b2h, where r is the radius and h is the height (in this case, the average depth).\n",
+                    "current_step": "Step 3: Recall the formula for the volume of a cylinder, which is V = \u03c0r\u00b2h, where r is the radius and h is the height (in this case, the average depth).\n",
+                    "depth": 3,
+                    "value": 0.7,
+                    "state": "expanded",
+                    "visit_sequence": 13,
+                    "is_final": false
+                },
+                {
+                    "question_id": "6",
+                    "node_id": "140553753746976",
+                    "parent_id": "140553746564784",
+                    "content": "Step 1: Identify the key information provided in the problem. The pool is circular with a 40-ft diameter, and the depth increases linearly from 2 ft at the south end to 7 ft at the north end.\nStep 2: Determine the average depth of the pool by taking the mean of the minimum and maximum depths. The average depth is (2 ft + 7 ft) / 2 = 4.5 ft.\nStep 3: Determine the area of the circular base of the pool using the formula A = \u03c0r\u00b2, where r is the radius we calculated (20 ft).\n",
+                    "current_step": "Step 3: Determine the area of the circular base of the pool using the formula A = \u03c0r\u00b2, where r is the radius we calculated (20 ft).\n",
+                    "depth": 3,
+                    "value": 0.7,
+                    "state": "expanded",
+                    "visit_sequence": 14,
+                    "is_final": false
+                },
+                {
+                    "question_id": "6",
+                    "node_id": "140553746161376",
+                    "parent_id": "140553746564784",
+                    "content": "Step 1: Identify the key information provided in the problem. The pool is circular with a 40-ft diameter, and the depth increases linearly from 2 ft at the south end to 7 ft at the north end.\nStep 2: Determine the average depth of the pool by taking the mean of the minimum and maximum depths. The average depth is (2 ft + 7 ft) / 2 = 4.5 ft.\nStep 3: Consider if we need to account for the varying depth in our calculations, or if using the average depth is sufficient for this problem.\n",
+                    "current_step": "Step 3: Consider if we need to account for the varying depth in our calculations, or if using the average depth is sufficient for this problem.\n",
+                    "depth": 3,
+                    "value": 0.4,
+                    "state": "expanded",
+                    "visit_sequence": 15,
+                    "is_final": false
+                },
+                {
+                    "question_id": "6",
+                    "node_id": "140553736206816",
+                    "parent_id": "140553746564784",
+                    "content": "Step 1: Identify the key information provided in the problem. The pool is circular with a 40-ft diameter, and the depth increases linearly from 2 ft at the south end to 7 ft at the north end.\nStep 2: Determine the average depth of the pool by taking the mean of the minimum and maximum depths. The average depth is (2 ft + 7 ft) / 2 = 4.5 ft.\nStep 3: Draw a diagram of the pool, showing its circular shape and the linear increase in depth from south to north, to visualize the problem better.\n",
+                    "current_step": "Step 3: Draw a diagram of the pool, showing its circular shape and the linear increase in depth from south to north, to visualize the problem better.\n",
+                    "depth": 3,
+                    "value": 0.5,
+                    "state": "expanded",
+                    "visit_sequence": 16,
+                    "is_final": false
+                },
+                {
+                    "question_id": "6",
+                    "node_id": "140553736199424",
+                    "parent_id": "140553736207968",
+                    "content": "Step 1: Identify the key information provided in the problem. The pool is circular with a 40-ft diameter, and the depth increases linearly from 2 ft at the south end to 7 ft at the north end.\nStep 2: Determine the average depth of the pool by taking the mean of the minimum and maximum depths. The average depth is (2 ft + 7 ft) / 2 = 4.5 ft.\nStep 3: Calculate the radius of the circular pool by dividing the diameter by 2. The radius is 40 ft / 2 = 20 ft.\nStep 4: Calculate the area of the circular base of the pool using the formula A = \u03c0r\u00b2, where r is the radius we found in Step 3.\n",
+                    "current_step": "Step 4: Calculate the area of the circular base of the pool using the formula A = \u03c0r\u00b2, where r is the radius we found in Step 3.\n",
+                    "depth": 4,
+                    "value": 0.8,
+                    "state": "expanded",
+                    "visit_sequence": 17,
+                    "is_final": false
+                },
+                {
+                    "question_id": "6",
+                    "node_id": "140553745216288",
+                    "parent_id": "140553736207968",
+                    "content": "Step 1: Identify the key information provided in the problem. The pool is circular with a 40-ft diameter, and the depth increases linearly from 2 ft at the south end to 7 ft at the north end.\nStep 2: Determine the average depth of the pool by taking the mean of the minimum and maximum depths. The average depth is (2 ft + 7 ft) / 2 = 4.5 ft.\nStep 3: Calculate the radius of the circular pool by dividing the diameter by 2. The radius is 40 ft / 2 = 20 ft.\nStep 4: Recognize that the volume of the pool can be found by multiplying the area of the circular base by the average depth, as the depth increases linearly.\n",
+                    "current_step": "Step 4: Recognize that the volume of the pool can be found by multiplying the area of the circular base by the average depth, as the depth increases linearly.\n",
+                    "depth": 4,
+                    "value": 0.8,
+                    "state": "expanded",
+                    "visit_sequence": 18,
+                    "is_final": false
+                },
+                {
+                    "question_id": "6",
+                    "node_id": "140553747983360",
+                    "parent_id": "140553736207968",
+                    "content": "Step 1: Identify the key information provided in the problem. The pool is circular with a 40-ft diameter, and the depth increases linearly from 2 ft at the south end to 7 ft at the north end.\nStep 2: Determine the average depth of the pool by taking the mean of the minimum and maximum depths. The average depth is (2 ft + 7 ft) / 2 = 4.5 ft.\nStep 3: Calculate the radius of the circular pool by dividing the diameter by 2. The radius is 40 ft / 2 = 20 ft.\nStep 4: Set up the volume calculation by using the formula V = \u03c0r\u00b2h, where r is the radius and h is the average depth we calculated in Steps 2 and 3.\n",
+                    "current_step": "Step 4: Set up the volume calculation by using the formula V = \u03c0r\u00b2h, where r is the radius and h is the average depth we calculated in Steps 2 and 3.\n",
+                    "depth": 4,
+                    "value": 1.0,
+                    "state": "expanded",
+                    "visit_sequence": 19,
+                    "is_final": false
+                },
+                {
+                    "question_id": "6",
+                    "node_id": "140553747983360",
+                    "parent_id": "140553736207968",
+                    "content": "Step 1: Identify the key information provided in the problem. The pool is circular with a 40-ft diameter, and the depth increases linearly from 2 ft at the south end to 7 ft at the north end.\nStep 2: Determine the average depth of the pool by taking the mean of the minimum and maximum depths. The average depth is (2 ft + 7 ft) / 2 = 4.5 ft.\nStep 3: Calculate the radius of the circular pool by dividing the diameter by 2. The radius is 40 ft / 2 = 20 ft.\nStep 4: Set up the volume calculation by using the formula V = \u03c0r\u00b2h, where r is the radius and h is the average depth we calculated in Steps 2 and 3.\n",
+                    "current_step": "Step 4: Set up the volume calculation by using the formula V = \u03c0r\u00b2h, where r is the radius and h is the average depth we calculated in Steps 2 and 3.\n",
+                    "depth": 4,
+                    "value": 1.0,
+                    "state": "solution",
+                    "visit_sequence": 19,
+                    "is_final": true
+                }
+            ]
+        },
+        "answer": "5654.86677646"
+    },
+    {
+        "content": "Calculate the energy of one mole of UV photons of wavelength $300 \\mathrm{~nm}$ and compare it with a typical single-bond energy of $400 \\mathrm{~kJ} / \\mathrm{mol}$. Answer in this unit:  $\\mathrm{~kJ} / \\mathrm{mol}$",
+        "solution": "Step 1: Outline the steps we'll need to take to solve this problem: 1) Calculate energy per photon, 2) Convert to energy per mole of photons, 3) Convert units to kJ/mol, 4) Compare with the given single-bond energy.\nStep 2: Use the relationship between energy and wavelength for photons, given by E = h\u03bd, where \u03bd is the frequency. Calculate \u03bd using c/\u03bb, where c is the speed of light and \u03bb is the given wavelength of 300 nm.\nStep 3: Calculate the frequency (\u03bd) of the UV photons using the equation \u03bd = c/\u03bb. We know c = 3.00 \u00d7 10^8 m/s and \u03bb = 300 nm = 3.00 \u00d7 10^-7 m. Perform this calculation to find \u03bd.\nStep 4: Use the calculated frequency to determine the energy per photon using the equation E = h\u03bd, where h is Planck's constant (6.626 \u00d7 10^-34 J\u00b7s).\nStep 5: Convert the energy per mole from joules to kilojoules: E(kJ/mol) = (3.99 \u00d7 10^5 J/mol) \u00d7 (1 kJ / 1000 J) = 399 kJ/mol\n",
+        "summary": "The final answer is $399$",
+        "accurate": true,
+        "real_answer": "399",
+        "trajectory_data": {
+            "question_id": 1,
+            "problem_prompt": "Calculate the energy of one mole of UV photons of wavelength $300 \\mathrm{~nm}$ and compare it with a typical single-bond energy of $400 \\mathrm{~kJ} / \\mathrm{mol}$. Answer in this unit:  $\\mathrm{~kJ} / \\mathrm{mol}$",
+            "algorithm": "bfs",
+            "branch": 5,
+            "select_branch": 2,
+            "max_depth": 8,
+            "end_gate": 0.97,
+            "prune_depth": 3,
+            "sub_low": 0.6,
+            "trajectory": [
+                {
+                    "question_id": "1",
+                    "node_id": "140289465135808",
+                    "parent_id": null,
+                    "content": "",
+                    "current_step": "",
+                    "depth": 0,
+                    "value": 0.0,
+                    "state": "root",
+                    "visit_sequence": 0,
+                    "is_final": false
+                },
+                {
+                    "question_id": "1",
+                    "node_id": "140289465875248",
+                    "parent_id": "140289465135808",
+                    "content": "Step 1: Here are 5 different reasonable next steps for this problem:\n",
+                    "current_step": "Step 1: Here are 5 different reasonable next steps for this problem:\n",
+                    "depth": 1,
+                    "value": 0.0,
+                    "state": "expanded",
+                    "visit_sequence": 1,
+                    "is_final": false
+                },
+                {
+                    "question_id": "1",
+                    "node_id": "140289465874912",
+                    "parent_id": "140289465135808",
+                    "content": "Step 1: Identify the key equation needed to calculate the energy of photons. We'll use E = hc/\u03bb, where E is energy, h is Planck's constant, c is the speed of light, and \u03bb is the wavelength.\n",
+                    "current_step": "Step 1: Identify the key equation needed to calculate the energy of photons. We'll use E = hc/\u03bb, where E is energy, h is Planck's constant, c is the speed of light, and \u03bb is the wavelength.\n",
+                    "depth": 1,
+                    "value": 0.3,
+                    "state": "expanded",
+                    "visit_sequence": 2,
+                    "is_final": false
+                },
+                {
+                    "question_id": "1",
+                    "node_id": "140289465871024",
+                    "parent_id": "140289465135808",
+                    "content": "Step 1: List the given information and constants needed for the calculation. We have \u03bb = 300 nm, and we'll need Planck's constant (h) and the speed of light (c).\n",
+                    "current_step": "Step 1: List the given information and constants needed for the calculation. We have \u03bb = 300 nm, and we'll need Planck's constant (h) and the speed of light (c).\n",
+                    "depth": 1,
+                    "value": 0.3,
+                    "state": "expanded",
+                    "visit_sequence": 3,
+                    "is_final": false
+                },
+                {
+                    "question_id": "1",
+                    "node_id": "140289465866656",
+                    "parent_id": "140289465135808",
+                    "content": "Step 1: Convert the wavelength from nanometers to meters for consistency in units. 300 nm = 300 \u00d7 10^-9 m.\n",
+                    "current_step": "Step 1: Convert the wavelength from nanometers to meters for consistency in units. 300 nm = 300 \u00d7 10^-9 m.\n",
+                    "depth": 1,
+                    "value": 0.2,
+                    "state": "expanded",
+                    "visit_sequence": 4,
+                    "is_final": false
+                },
+                {
+                    "question_id": "1",
+                    "node_id": "140289465865312",
+                    "parent_id": "140289465135808",
+                    "content": "Step 1: Recall Avogadro's number (N_A) as we need to calculate the energy for one mole of photons. N_A = 6.022 \u00d7 10^23 mol^-1.\n",
+                    "current_step": "Step 1: Recall Avogadro's number (N_A) as we need to calculate the energy for one mole of photons. N_A = 6.022 \u00d7 10^23 mol^-1.\n",
+                    "depth": 1,
+                    "value": 0.2,
+                    "state": "expanded",
+                    "visit_sequence": 5,
+                    "is_final": false
+                },
+                {
+                    "question_id": "1",
+                    "node_id": "140289465867280",
+                    "parent_id": "140289465135808",
+                    "content": "Step 1: Outline the steps we'll need to take to solve this problem: 1) Calculate energy per photon, 2) Convert to energy per mole of photons, 3) Convert units to kJ/mol, 4) Compare with the given single-bond energy.\n",
+                    "current_step": "Step 1: Outline the steps we'll need to take to solve this problem: 1) Calculate energy per photon, 2) Convert to energy per mole of photons, 3) Convert units to kJ/mol, 4) Compare with the given single-bond energy.\n",
+                    "depth": 1,
+                    "value": 0.7,
+                    "state": "expanded",
+                    "visit_sequence": 6,
+                    "is_final": false
+                },
+                {
+                    "question_id": "1",
+                    "node_id": "140289465432832",
+                    "parent_id": "140289465867280",
+                    "content": "Step 1: Outline the steps we'll need to take to solve this problem: 1) Calculate energy per photon, 2) Convert to energy per mole of photons, 3) Convert units to kJ/mol, 4) Compare with the given single-bond energy.\nStep 2: Calculate the energy of a single photon using the equation E = hc/\u03bb, where h is Planck's constant (6.626 \u00d7 10^-34 J\u00b7s), c is the speed of light (3.0 \u00d7 10^8 m/s), and \u03bb is the wavelength (300 nm = 3.0 \u00d7 10^-7 m).\n",
+                    "current_step": "Step 2: Calculate the energy of a single photon using the equation E = hc/\u03bb, where h is Planck's constant (6.626 \u00d7 10^-34 J\u00b7s), c is the speed of light (3.0 \u00d7 10^8 m/s), and \u03bb is the wavelength (300 nm = 3.0 \u00d7 10^-7 m).\n",
+                    "depth": 2,
+                    "value": 0.4,
+                    "state": "expanded",
+                    "visit_sequence": 7,
+                    "is_final": false
+                },
+                {
+                    "question_id": "1",
+                    "node_id": "140289465869632",
+                    "parent_id": "140289465867280",
+                    "content": "Step 1: Outline the steps we'll need to take to solve this problem: 1) Calculate energy per photon, 2) Convert to energy per mole of photons, 3) Convert units to kJ/mol, 4) Compare with the given single-bond energy.\nStep 2: Determine the energy of a single photon using E = hf, where h is Planck's constant and f is the frequency. First, calculate the frequency from the given wavelength using the relation c = f\u03bb.\n",
+                    "current_step": "Step 2: Determine the energy of a single photon using E = hf, where h is Planck's constant and f is the frequency. First, calculate the frequency from the given wavelength using the relation c = f\u03bb.\n",
+                    "depth": 2,
+                    "value": 0.4,
+                    "state": "expanded",
+                    "visit_sequence": 8,
+                    "is_final": false
+                },
+                {
+                    "question_id": "1",
+                    "node_id": "140289465427216",
+                    "parent_id": "140289465867280",
+                    "content": "Step 1: Outline the steps we'll need to take to solve this problem: 1) Calculate energy per photon, 2) Convert to energy per mole of photons, 3) Convert units to kJ/mol, 4) Compare with the given single-bond energy.\nStep 2: Use the relationship between energy and wavelength for photons, given by E = h\u03bd, where \u03bd is the frequency. Calculate \u03bd using c/\u03bb, where c is the speed of light and \u03bb is the given wavelength of 300 nm.\n",
+                    "current_step": "Step 2: Use the relationship between energy and wavelength for photons, given by E = h\u03bd, where \u03bd is the frequency. Calculate \u03bd using c/\u03bb, where c is the speed of light and \u03bb is the given wavelength of 300 nm.\n",
+                    "depth": 2,
+                    "value": 0.7,
+                    "state": "expanded",
+                    "visit_sequence": 9,
+                    "is_final": false
+                },
+                {
+                    "question_id": "1",
+                    "node_id": "140289465427120",
+                    "parent_id": "140289465867280",
+                    "content": "Step 1: Outline the steps we'll need to take to solve this problem: 1) Calculate energy per photon, 2) Convert to energy per mole of photons, 3) Convert units to kJ/mol, 4) Compare with the given single-bond energy.\nStep 2: Begin by converting the wavelength from nanometers to meters: 300 nm = 3.0 \u00d7 10^-7 m. Then use this value in the equation E = hc/\u03bb to find the energy of a single photon.\n",
+                    "current_step": "Step 2: Begin by converting the wavelength from nanometers to meters: 300 nm = 3.0 \u00d7 10^-7 m. Then use this value in the equation E = hc/\u03bb to find the energy of a single photon.\n",
+                    "depth": 2,
+                    "value": 0.4,
+                    "state": "expanded",
+                    "visit_sequence": 10,
+                    "is_final": false
+                },
+                {
+                    "question_id": "1",
+                    "node_id": "140289465860224",
+                    "parent_id": "140289465867280",
+                    "content": "Step 1: Outline the steps we'll need to take to solve this problem: 1) Calculate energy per photon, 2) Convert to energy per mole of photons, 3) Convert units to kJ/mol, 4) Compare with the given single-bond energy.\nStep 2: Start by recalling that the energy of a photon is inversely proportional to its wavelength. Use the equation E = hc/\u03bb, where h is Planck's constant, c is the speed of light, and \u03bb is 300 nm expressed in meters.\n",
+                    "current_step": "Step 2: Start by recalling that the energy of a photon is inversely proportional to its wavelength. Use the equation E = hc/\u03bb, where h is Planck's constant, c is the speed of light, and \u03bb is 300 nm expressed in meters.\n",
+                    "depth": 2,
+                    "value": 0.4,
+                    "state": "expanded",
+                    "visit_sequence": 11,
+                    "is_final": false
+                },
+                {
+                    "question_id": "1",
+                    "node_id": "140289465432064",
+                    "parent_id": "140289465427216",
+                    "content": "Step 1: Outline the steps we'll need to take to solve this problem: 1) Calculate energy per photon, 2) Convert to energy per mole of photons, 3) Convert units to kJ/mol, 4) Compare with the given single-bond energy.\nStep 2: Use the relationship between energy and wavelength for photons, given by E = h\u03bd, where \u03bd is the frequency. Calculate \u03bd using c/\u03bb, where c is the speed of light and \u03bb is the given wavelength of 300 nm.\nStep 3: Calculate the frequency (\u03bd) of the UV photons using the equation \u03bd = c/\u03bb. We know c = 3.00 \u00d7 10^8 m/s and \u03bb = 300 nm = 3.00 \u00d7 10^-7 m. Perform this calculation to find \u03bd.\n",
+                    "current_step": "Step 3: Calculate the frequency (\u03bd) of the UV photons using the equation \u03bd = c/\u03bb. We know c = 3.00 \u00d7 10^8 m/s and \u03bb = 300 nm = 3.00 \u00d7 10^-7 m. Perform this calculation to find \u03bd.\n",
+                    "depth": 3,
+                    "value": 0.6,
+                    "state": "expanded",
+                    "visit_sequence": 12,
+                    "is_final": false
+                },
+                {
+                    "question_id": "1",
+                    "node_id": "140289465860176",
+                    "parent_id": "140289465427216",
+                    "content": "Step 1: Outline the steps we'll need to take to solve this problem: 1) Calculate energy per photon, 2) Convert to energy per mole of photons, 3) Convert units to kJ/mol, 4) Compare with the given single-bond energy.\nStep 2: Use the relationship between energy and wavelength for photons, given by E = h\u03bd, where \u03bd is the frequency. Calculate \u03bd using c/\u03bb, where c is the speed of light and \u03bb is the given wavelength of 300 nm.\nStep 3: Determine the value of Planck's constant (h) needed for the energy calculation. Look up or recall that h = 6.626 \u00d7 10^-34 J\u00b7s.\n",
+                    "current_step": "Step 3: Determine the value of Planck's constant (h) needed for the energy calculation. Look up or recall that h = 6.626 \u00d7 10^-34 J\u00b7s.\n",
+                    "depth": 3,
+                    "value": 0.4,
+                    "state": "expanded",
+                    "visit_sequence": 13,
+                    "is_final": false
+                },
+                {
+                    "question_id": "1",
+                    "node_id": "140289465860608",
+                    "parent_id": "140289465427216",
+                    "content": "Step 1: Outline the steps we'll need to take to solve this problem: 1) Calculate energy per photon, 2) Convert to energy per mole of photons, 3) Convert units to kJ/mol, 4) Compare with the given single-bond energy.\nStep 2: Use the relationship between energy and wavelength for photons, given by E = h\u03bd, where \u03bd is the frequency. Calculate \u03bd using c/\u03bb, where c is the speed of light and \u03bb is the given wavelength of 300 nm.\nStep 3: Using the equation E = h\u03bd, calculate the energy of a single UV photon. Substitute the values of h (Planck's constant) and \u03bd (frequency calculated in the previous step) to find E in joules.\n",
+                    "current_step": "Step 3: Using the equation E = h\u03bd, calculate the energy of a single UV photon. Substitute the values of h (Planck's constant) and \u03bd (frequency calculated in the previous step) to find E in joules.\n",
+                    "depth": 3,
+                    "value": 0.5,
+                    "state": "expanded",
+                    "visit_sequence": 14,
+                    "is_final": false
+                },
+                {
+                    "question_id": "1",
+                    "node_id": "140289465869104",
+                    "parent_id": "140289465427216",
+                    "content": "Step 1: Outline the steps we'll need to take to solve this problem: 1) Calculate energy per photon, 2) Convert to energy per mole of photons, 3) Convert units to kJ/mol, 4) Compare with the given single-bond energy.\nStep 2: Use the relationship between energy and wavelength for photons, given by E = h\u03bd, where \u03bd is the frequency. Calculate \u03bd using c/\u03bb, where c is the speed of light and \u03bb is the given wavelength of 300 nm.\nStep 3: Convert the wavelength from nanometers to meters for use in subsequent calculations. 300 nm = 3.00 \u00d7 10^-7 m.\n",
+                    "current_step": "Step 3: Convert the wavelength from nanometers to meters for use in subsequent calculations. 300 nm = 3.00 \u00d7 10^-7 m.\n",
+                    "depth": 3,
+                    "value": 0.6,
+                    "state": "expanded",
+                    "visit_sequence": 15,
+                    "is_final": false
+                },
+                {
+                    "question_id": "1",
+                    "node_id": "140289465865936",
+                    "parent_id": "140289465427216",
+                    "content": "Step 1: Outline the steps we'll need to take to solve this problem: 1) Calculate energy per photon, 2) Convert to energy per mole of photons, 3) Convert units to kJ/mol, 4) Compare with the given single-bond energy.\nStep 2: Use the relationship between energy and wavelength for photons, given by E = h\u03bd, where \u03bd is the frequency. Calculate \u03bd using c/\u03bb, where c is the speed of light and \u03bb is the given wavelength of 300 nm.\nStep 3: Begin by calculating the frequency of the UV photons using \u03bd = c/\u03bb, where c is the speed of light (3.00 \u00d7 10^8 m/s) and \u03bb is the wavelength (300 nm = 3.00 \u00d7 10^-7 m). Then use this frequency to calculate the energy of a single photon using E = h\u03bd, where h is Planck's constant (6.626 \u00d7 10^-34 J\u00b7s).\n",
+                    "current_step": "Step 3: Begin by calculating the frequency of the UV photons using \u03bd = c/\u03bb, where c is the speed of light (3.00 \u00d7 10^8 m/s) and \u03bb is the wavelength (300 nm = 3.00 \u00d7 10^-7 m). Then use this frequency to calculate the energy of a single photon using E = h\u03bd, where h is Planck's constant (6.626 \u00d7 10^-34 J\u00b7s).\n",
+                    "depth": 3,
+                    "value": 0.6,
+                    "state": "expanded",
+                    "visit_sequence": 16,
+                    "is_final": false
+                },
+                {
+                    "question_id": "1",
+                    "node_id": "140289465867760",
+                    "parent_id": "140289465432064",
+                    "content": "Step 1: Outline the steps we'll need to take to solve this problem: 1) Calculate energy per photon, 2) Convert to energy per mole of photons, 3) Convert units to kJ/mol, 4) Compare with the given single-bond energy.\nStep 2: Use the relationship between energy and wavelength for photons, given by E = h\u03bd, where \u03bd is the frequency. Calculate \u03bd using c/\u03bb, where c is the speed of light and \u03bb is the given wavelength of 300 nm.\nStep 3: Calculate the frequency (\u03bd) of the UV photons using the equation \u03bd = c/\u03bb. We know c = 3.00 \u00d7 10^8 m/s and \u03bb = 300 nm = 3.00 \u00d7 10^-7 m. Perform this calculation to find \u03bd.\nStep 4: Calculate the frequency (\u03bd) of the UV photons: \u03bd = c / \u03bb = (3.00 \u00d7 10^8 m/s) / (3.00 \u00d7 10^-7 m) = 1.00 \u00d7 10^15 Hz\n",
+                    "current_step": "Step 4: Calculate the frequency (\u03bd) of the UV photons: \u03bd = c / \u03bb = (3.00 \u00d7 10^8 m/s) / (3.00 \u00d7 10^-7 m) = 1.00 \u00d7 10^15 Hz\n",
+                    "depth": 4,
+                    "value": 0.5,
+                    "state": "expanded",
+                    "visit_sequence": 17,
+                    "is_final": false
+                },
+                {
+                    "question_id": "1",
+                    "node_id": "140289465866320",
+                    "parent_id": "140289465432064",
+                    "content": "Step 1: Outline the steps we'll need to take to solve this problem: 1) Calculate energy per photon, 2) Convert to energy per mole of photons, 3) Convert units to kJ/mol, 4) Compare with the given single-bond energy.\nStep 2: Use the relationship between energy and wavelength for photons, given by E = h\u03bd, where \u03bd is the frequency. Calculate \u03bd using c/\u03bb, where c is the speed of light and \u03bb is the given wavelength of 300 nm.\nStep 3: Calculate the frequency (\u03bd) of the UV photons using the equation \u03bd = c/\u03bb. We know c = 3.00 \u00d7 10^8 m/s and \u03bb = 300 nm = 3.00 \u00d7 10^-7 m. Perform this calculation to find \u03bd.\nStep 4: Use the calculated frequency to determine the energy per photon using the equation E = h\u03bd, where h is Planck's constant (6.626 \u00d7 10^-34 J\u00b7s).\n",
+                    "current_step": "Step 4: Use the calculated frequency to determine the energy per photon using the equation E = h\u03bd, where h is Planck's constant (6.626 \u00d7 10^-34 J\u00b7s).\n",
+                    "depth": 4,
+                    "value": 0.6,
+                    "state": "expanded",
+                    "visit_sequence": 18,
+                    "is_final": false
+                },
+                {
+                    "question_id": "1",
+                    "node_id": "140289465870544",
+                    "parent_id": "140289465432064",
+                    "content": "Step 1: Outline the steps we'll need to take to solve this problem: 1) Calculate energy per photon, 2) Convert to energy per mole of photons, 3) Convert units to kJ/mol, 4) Compare with the given single-bond energy.\nStep 2: Use the relationship between energy and wavelength for photons, given by E = h\u03bd, where \u03bd is the frequency. Calculate \u03bd using c/\u03bb, where c is the speed of light and \u03bb is the given wavelength of 300 nm.\nStep 3: Calculate the frequency (\u03bd) of the UV photons using the equation \u03bd = c/\u03bb. We know c = 3.00 \u00d7 10^8 m/s and \u03bb = 300 nm = 3.00 \u00d7 10^-7 m. Perform this calculation to find \u03bd.\nStep 4: Calculate the energy per photon using E = hc/\u03bb, where h is Planck's constant (6.626 \u00d7 10^-34 J\u00b7s), c is the speed of light (3.00 \u00d7 10^8 m/s), and \u03bb is the wavelength (300 nm).\n",
+                    "current_step": "Step 4: Calculate the energy per photon using E = hc/\u03bb, where h is Planck's constant (6.626 \u00d7 10^-34 J\u00b7s), c is the speed of light (3.00 \u00d7 10^8 m/s), and \u03bb is the wavelength (300 nm).\n",
+                    "depth": 4,
+                    "value": 0.6,
+                    "state": "expanded",
+                    "visit_sequence": 19,
+                    "is_final": false
+                },
+                {
+                    "question_id": "1",
+                    "node_id": "140289465979712",
+                    "parent_id": "140289465432064",
+                    "content": "Step 1: Outline the steps we'll need to take to solve this problem: 1) Calculate energy per photon, 2) Convert to energy per mole of photons, 3) Convert units to kJ/mol, 4) Compare with the given single-bond energy.\nStep 2: Use the relationship between energy and wavelength for photons, given by E = h\u03bd, where \u03bd is the frequency. Calculate \u03bd using c/\u03bb, where c is the speed of light and \u03bb is the given wavelength of 300 nm.\nStep 3: Calculate the frequency (\u03bd) of the UV photons using the equation \u03bd = c/\u03bb. We know c = 3.00 \u00d7 10^8 m/s and \u03bb = 300 nm = 3.00 \u00d7 10^-7 m. Perform this calculation to find \u03bd.\nStep 4: Determine the number of photons in one mole using Avogadro's number (6.022 \u00d7 10^23 photons/mol) to prepare for calculating the energy per mole of photons.\n",
+                    "current_step": "Step 4: Determine the number of photons in one mole using Avogadro's number (6.022 \u00d7 10^23 photons/mol) to prepare for calculating the energy per mole of photons.\n",
+                    "depth": 4,
+                    "value": 0.6,
+                    "state": "expanded",
+                    "visit_sequence": 20,
+                    "is_final": false
+                },
+                {
+                    "question_id": "1",
+                    "node_id": "140289465975056",
+                    "parent_id": "140289465432064",
+                    "content": "Step 1: Outline the steps we'll need to take to solve this problem: 1) Calculate energy per photon, 2) Convert to energy per mole of photons, 3) Convert units to kJ/mol, 4) Compare with the given single-bond energy.\nStep 2: Use the relationship between energy and wavelength for photons, given by E = h\u03bd, where \u03bd is the frequency. Calculate \u03bd using c/\u03bb, where c is the speed of light and \u03bb is the given wavelength of 300 nm.\nStep 3: Calculate the frequency (\u03bd) of the UV photons using the equation \u03bd = c/\u03bb. We know c = 3.00 \u00d7 10^8 m/s and \u03bb = 300 nm = 3.00 \u00d7 10^-7 m. Perform this calculation to find \u03bd.\nStep 4: Convert the wavelength from nanometers to meters for consistency in units before calculating the energy: 300 nm = 3.00 \u00d7 10^-7 m.\n",
+                    "current_step": "Step 4: Convert the wavelength from nanometers to meters for consistency in units before calculating the energy: 300 nm = 3.00 \u00d7 10^-7 m.\n",
+                    "depth": 4,
+                    "value": 0.4,
+                    "state": "expanded",
+                    "visit_sequence": 21,
+                    "is_final": false
+                },
+                {
+                    "question_id": "1",
+                    "node_id": "140289465987920",
+                    "parent_id": "140289465866320",
+                    "content": "Step 1: Outline the steps we'll need to take to solve this problem: 1) Calculate energy per photon, 2) Convert to energy per mole of photons, 3) Convert units to kJ/mol, 4) Compare with the given single-bond energy.\nStep 2: Use the relationship between energy and wavelength for photons, given by E = h\u03bd, where \u03bd is the frequency. Calculate \u03bd using c/\u03bb, where c is the speed of light and \u03bb is the given wavelength of 300 nm.\nStep 3: Calculate the frequency (\u03bd) of the UV photons using the equation \u03bd = c/\u03bb. We know c = 3.00 \u00d7 10^8 m/s and \u03bb = 300 nm = 3.00 \u00d7 10^-7 m. Perform this calculation to find \u03bd.\nStep 4: Use the calculated frequency to determine the energy per photon using the equation E = h\u03bd, where h is Planck's constant (6.626 \u00d7 10^-34 J\u00b7s).\nStep 5: Calculate the frequency (\u03bd) of the UV photons: \u03bd = c / \u03bb = (3.00 \u00d7 10^8 m/s) / (3.00 \u00d7 10^-7 m) = 1.00 \u00d7 10^15 Hz\n",
+                    "current_step": "Step 5: Calculate the frequency (\u03bd) of the UV photons: \u03bd = c / \u03bb = (3.00 \u00d7 10^8 m/s) / (3.00 \u00d7 10^-7 m) = 1.00 \u00d7 10^15 Hz\n",
+                    "depth": 5,
+                    "value": 0.6,
+                    "state": "expanded",
+                    "visit_sequence": 22,
+                    "is_final": false
+                },
+                {
+                    "question_id": "1",
+                    "node_id": "140289465987968",
+                    "parent_id": "140289465866320",
+                    "content": "Step 1: Outline the steps we'll need to take to solve this problem: 1) Calculate energy per photon, 2) Convert to energy per mole of photons, 3) Convert units to kJ/mol, 4) Compare with the given single-bond energy.\nStep 2: Use the relationship between energy and wavelength for photons, given by E = h\u03bd, where \u03bd is the frequency. Calculate \u03bd using c/\u03bb, where c is the speed of light and \u03bb is the given wavelength of 300 nm.\nStep 3: Calculate the frequency (\u03bd) of the UV photons using the equation \u03bd = c/\u03bb. We know c = 3.00 \u00d7 10^8 m/s and \u03bb = 300 nm = 3.00 \u00d7 10^-7 m. Perform this calculation to find \u03bd.\nStep 4: Use the calculated frequency to determine the energy per photon using the equation E = h\u03bd, where h is Planck's constant (6.626 \u00d7 10^-34 J\u00b7s).\nStep 5: Calculate the energy per photon using E = h\u03bd: E = (6.626 \u00d7 10^-34 J\u00b7s) \u00d7 (1.00 \u00d7 10^15 Hz) = 6.626 \u00d7 10^-19 J\n",
+                    "current_step": "Step 5: Calculate the energy per photon using E = h\u03bd: E = (6.626 \u00d7 10^-34 J\u00b7s) \u00d7 (1.00 \u00d7 10^15 Hz) = 6.626 \u00d7 10^-19 J\n",
+                    "depth": 5,
+                    "value": 0.6,
+                    "state": "expanded",
+                    "visit_sequence": 23,
+                    "is_final": false
+                },
+                {
+                    "question_id": "1",
+                    "node_id": "140289465990416",
+                    "parent_id": "140289465866320",
+                    "content": "Step 1: Outline the steps we'll need to take to solve this problem: 1) Calculate energy per photon, 2) Convert to energy per mole of photons, 3) Convert units to kJ/mol, 4) Compare with the given single-bond energy.\nStep 2: Use the relationship between energy and wavelength for photons, given by E = h\u03bd, where \u03bd is the frequency. Calculate \u03bd using c/\u03bb, where c is the speed of light and \u03bb is the given wavelength of 300 nm.\nStep 3: Calculate the frequency (\u03bd) of the UV photons using the equation \u03bd = c/\u03bb. We know c = 3.00 \u00d7 10^8 m/s and \u03bb = 300 nm = 3.00 \u00d7 10^-7 m. Perform this calculation to find \u03bd.\nStep 4: Use the calculated frequency to determine the energy per photon using the equation E = h\u03bd, where h is Planck's constant (6.626 \u00d7 10^-34 J\u00b7s).\nStep 5: Convert the energy per photon to energy per mole of photons by multiplying by Avogadro's number (6.022 \u00d7 10^23 mol^-1): E(per mole) = (6.626 \u00d7 10^-19 J/photon) \u00d7 (6.022 \u00d7 10^23 photons/mol) = 3.99 \u00d7 10^5 J/mol\n",
+                    "current_step": "Step 5: Convert the energy per photon to energy per mole of photons by multiplying by Avogadro's number (6.022 \u00d7 10^23 mol^-1): E(per mole) = (6.626 \u00d7 10^-19 J/photon) \u00d7 (6.022 \u00d7 10^23 photons/mol) = 3.99 \u00d7 10^5 J/mol\n",
+                    "depth": 5,
+                    "value": 0.95,
+                    "state": "expanded",
+                    "visit_sequence": 24,
+                    "is_final": false
+                },
+                {
+                    "question_id": "1",
+                    "node_id": "140289465978368",
+                    "parent_id": "140289465866320",
+                    "content": "Step 1: Outline the steps we'll need to take to solve this problem: 1) Calculate energy per photon, 2) Convert to energy per mole of photons, 3) Convert units to kJ/mol, 4) Compare with the given single-bond energy.\nStep 2: Use the relationship between energy and wavelength for photons, given by E = h\u03bd, where \u03bd is the frequency. Calculate \u03bd using c/\u03bb, where c is the speed of light and \u03bb is the given wavelength of 300 nm.\nStep 3: Calculate the frequency (\u03bd) of the UV photons using the equation \u03bd = c/\u03bb. We know c = 3.00 \u00d7 10^8 m/s and \u03bb = 300 nm = 3.00 \u00d7 10^-7 m. Perform this calculation to find \u03bd.\nStep 4: Use the calculated frequency to determine the energy per photon using the equation E = h\u03bd, where h is Planck's constant (6.626 \u00d7 10^-34 J\u00b7s).\nStep 5: Convert the energy per mole from joules to kilojoules: E(kJ/mol) = (3.99 \u00d7 10^5 J/mol) \u00d7 (1 kJ / 1000 J) = 399 kJ/mol\n",
+                    "current_step": "Step 5: Convert the energy per mole from joules to kilojoules: E(kJ/mol) = (3.99 \u00d7 10^5 J/mol) \u00d7 (1 kJ / 1000 J) = 399 kJ/mol\n",
+                    "depth": 5,
+                    "value": 1.0,
+                    "state": "expanded",
+                    "visit_sequence": 25,
+                    "is_final": false
+                },
+                {
+                    "question_id": "1",
+                    "node_id": "140289465978368",
+                    "parent_id": "140289465866320",
+                    "content": "Step 1: Outline the steps we'll need to take to solve this problem: 1) Calculate energy per photon, 2) Convert to energy per mole of photons, 3) Convert units to kJ/mol, 4) Compare with the given single-bond energy.\nStep 2: Use the relationship between energy and wavelength for photons, given by E = h\u03bd, where \u03bd is the frequency. Calculate \u03bd using c/\u03bb, where c is the speed of light and \u03bb is the given wavelength of 300 nm.\nStep 3: Calculate the frequency (\u03bd) of the UV photons using the equation \u03bd = c/\u03bb. We know c = 3.00 \u00d7 10^8 m/s and \u03bb = 300 nm = 3.00 \u00d7 10^-7 m. Perform this calculation to find \u03bd.\nStep 4: Use the calculated frequency to determine the energy per photon using the equation E = h\u03bd, where h is Planck's constant (6.626 \u00d7 10^-34 J\u00b7s).\nStep 5: Convert the energy per mole from joules to kilojoules: E(kJ/mol) = (3.99 \u00d7 10^5 J/mol) \u00d7 (1 kJ / 1000 J) = 399 kJ/mol\n",
+                    "current_step": "Step 5: Convert the energy per mole from joules to kilojoules: E(kJ/mol) = (3.99 \u00d7 10^5 J/mol) \u00d7 (1 kJ / 1000 J) = 399 kJ/mol\n",
+                    "depth": 5,
+                    "value": 1.0,
+                    "state": "solution",
+                    "visit_sequence": 25,
+                    "is_final": true
+                }
+            ]
+        },
+        "answer": "399"
+    },
+    {
+        "content": "For a macroscopic object of mass $1.0 \\mathrm{~g}$ moving with speed $1.0 \\mathrm{~cm} / \\mathrm{s}$ in a one-dimensional box of length $1.0 \\mathrm{~cm}$, find the quantum number $n$. Answer in this unit: $10^{26}$",
+        "solution": "Step 1: Define the de Broglie wavelength \u03bb = h/p, where h is Planck's constant and p is the momentum of the object. This will be crucial for determining the quantum number.\nStep 2: Express the relationship between the box length L, the de Broglie wavelength \u03bb, and the quantum number n. In a one-dimensional box, this relationship is given by L = n\u03bb/2, where n is the quantum number we're trying to find.\nStep 3: Calculate the momentum p of the object using the given mass and speed. We know that p = mv, where m = 1.0 g = 0.001 kg and v = 1.0 cm/s = 0.01 m/s.\nStep 4: Calculate the momentum p using the values we determined in Step 3. p = mv = (0.001 kg)(0.01 m/s) = 1 \u00d7 10^-5 kg\u00b7m/s.\nStep 5: Rearrange the equation L = n\u03bb/2 to solve for n. We can express this as n = 2L/\u03bb. Then, substitute the known values for L (box length) and the calculated value for \u03bb (de Broglie wavelength) to find n.\nStep 6: Substitute the values for L (box length, 1.0 cm = 0.01 m) and the calculated \u03bb into the equation n = 2L/\u03bb. This gives us n = 2(0.01 m) / (6.626 \u00d7 10^-29 m) = 3.017 \u00d7 10^26.\n",
+        "summary": "The final answer is $3.02$.",
+        "accurate": true,
+        "real_answer": "3",
+        "trajectory_data": {
+            "question_id": 26,
+            "problem_prompt": "For a macroscopic object of mass $1.0 \\mathrm{~g}$ moving with speed $1.0 \\mathrm{~cm} / \\mathrm{s}$ in a one-dimensional box of length $1.0 \\mathrm{~cm}$, find the quantum number $n$. Answer in this unit: $10^{26}$",
+            "algorithm": "bfs",
+            "branch": 5,
+            "select_branch": 2,
+            "max_depth": 8,
+            "end_gate": 0.97,
+            "prune_depth": 3,
+            "sub_low": 0.6,
+            "trajectory": [
+                {
+                    "question_id": "26",
+                    "node_id": "139919212218560",
+                    "parent_id": null,
+                    "content": "",
+                    "current_step": "",
+                    "depth": 0,
+                    "value": 0.0,
+                    "state": "root",
+                    "visit_sequence": 0,
+                    "is_final": false
+                },
+                {
+                    "question_id": "26",
+                    "node_id": "139919212307008",
+                    "parent_id": "139919212218560",
+                    "content": "Step 1: Here are 5 different reasonable next steps for this problem:\n",
+                    "current_step": "Step 1: Here are 5 different reasonable next steps for this problem:\n",
+                    "depth": 1,
+                    "value": 0.0,
+                    "state": "expanded",
+                    "visit_sequence": 1,
+                    "is_final": false
+                },
+                {
+                    "question_id": "26",
+                    "node_id": "139919212311088",
+                    "parent_id": "139919212218560",
+                    "content": "Step 1: Define the de Broglie wavelength \u03bb = h/p, where h is Planck's constant and p is the momentum of the object. This will be crucial for determining the quantum number.\n",
+                    "current_step": "Step 1: Define the de Broglie wavelength \u03bb = h/p, where h is Planck's constant and p is the momentum of the object. This will be crucial for determining the quantum number.\n",
+                    "depth": 1,
+                    "value": 0.3,
+                    "state": "expanded",
+                    "visit_sequence": 2,
+                    "is_final": false
+                },
+                {
+                    "question_id": "26",
+                    "node_id": "139919212310752",
+                    "parent_id": "139919212218560",
+                    "content": "Step 1: Calculate the momentum p of the object using the given mass and velocity. We can use the classical formula p = mv.\n",
+                    "current_step": "Step 1: Calculate the momentum p of the object using the given mass and velocity. We can use the classical formula p = mv.\n",
+                    "depth": 1,
+                    "value": 0.3,
+                    "state": "expanded",
+                    "visit_sequence": 3,
+                    "is_final": false
+                },
+                {
+                    "question_id": "26",
+                    "node_id": "139919212312480",
+                    "parent_id": "139919212218560",
+                    "content": "Step 1: Recall that for a particle in a one-dimensional box, the allowed wavelengths are given by \u03bb = 2L/n, where L is the length of the box and n is the quantum number we're trying to find.\n",
+                    "current_step": "Step 1: Recall that for a particle in a one-dimensional box, the allowed wavelengths are given by \u03bb = 2L/n, where L is the length of the box and n is the quantum number we're trying to find.\n",
+                    "depth": 1,
+                    "value": 0.3,
+                    "state": "expanded",
+                    "visit_sequence": 4,
+                    "is_final": false
+                },
+                {
+                    "question_id": "26",
+                    "node_id": "139919212312768",
+                    "parent_id": "139919212218560",
+                    "content": "Step 1: Express the energy of the particle using the classical kinetic energy formula E = (1/2)mv^2. This will help us compare classical and quantum descriptions of the system.\n",
+                    "current_step": "Step 1: Express the energy of the particle using the classical kinetic energy formula E = (1/2)mv^2. This will help us compare classical and quantum descriptions of the system.\n",
+                    "depth": 1,
+                    "value": 0.3,
+                    "state": "expanded",
+                    "visit_sequence": 5,
+                    "is_final": false
+                },
+                {
+                    "question_id": "26",
+                    "node_id": "139919219616912",
+                    "parent_id": "139919212218560",
+                    "content": "Step 1: Consider the uncertainty principle \u0394x\u0394p \u2265 \u0127/2 to estimate whether quantum effects are significant for this macroscopic object. This will help justify our approach to finding the quantum number.\n",
+                    "current_step": "Step 1: Consider the uncertainty principle \u0394x\u0394p \u2265 \u0127/2 to estimate whether quantum effects are significant for this macroscopic object. This will help justify our approach to finding the quantum number.\n",
+                    "depth": 1,
+                    "value": 0.3,
+                    "state": "expanded",
+                    "visit_sequence": 6,
+                    "is_final": false
+                },
+                {
+                    "question_id": "26",
+                    "node_id": "139920157571456",
+                    "parent_id": "139919212311088",
+                    "content": "Step 1: Define the de Broglie wavelength \u03bb = h/p, where h is Planck's constant and p is the momentum of the object. This will be crucial for determining the quantum number.\nStep 2: Calculate the momentum p of the object using the given mass and speed. We can use the classical formula p = mv, where m is the mass and v is the velocity.\n",
+                    "current_step": "Step 2: Calculate the momentum p of the object using the given mass and speed. We can use the classical formula p = mv, where m is the mass and v is the velocity.\n",
+                    "depth": 2,
+                    "value": 0.4,
+                    "state": "expanded",
+                    "visit_sequence": 7,
+                    "is_final": false
+                },
+                {
+                    "question_id": "26",
+                    "node_id": "139919212218320",
+                    "parent_id": "139919212311088",
+                    "content": "Step 1: Define the de Broglie wavelength \u03bb = h/p, where h is Planck's constant and p is the momentum of the object. This will be crucial for determining the quantum number.\nStep 2: Determine the value of Planck's constant h, which is approximately 6.626 \u00d7 10^-34 J\u22c5s. This constant will be needed to calculate the de Broglie wavelength.\n",
+                    "current_step": "Step 2: Determine the value of Planck's constant h, which is approximately 6.626 \u00d7 10^-34 J\u22c5s. This constant will be needed to calculate the de Broglie wavelength.\n",
+                    "depth": 2,
+                    "value": 0.4,
+                    "state": "expanded",
+                    "visit_sequence": 8,
+                    "is_final": false
+                },
+                {
+                    "question_id": "26",
+                    "node_id": "139919212223168",
+                    "parent_id": "139919212311088",
+                    "content": "Step 1: Define the de Broglie wavelength \u03bb = h/p, where h is Planck's constant and p is the momentum of the object. This will be crucial for determining the quantum number.\nStep 2: Consider the boundary conditions for a particle in a one-dimensional box. The wavelength of the particle must fit an integer number of times into the box length, which will help us relate the de Broglie wavelength to the quantum number n.\n",
+                    "current_step": "Step 2: Consider the boundary conditions for a particle in a one-dimensional box. The wavelength of the particle must fit an integer number of times into the box length, which will help us relate the de Broglie wavelength to the quantum number n.\n",
+                    "depth": 2,
+                    "value": 0.4,
+                    "state": "expanded",
+                    "visit_sequence": 9,
+                    "is_final": false
+                },
+                {
+                    "question_id": "26",
+                    "node_id": "139919212219232",
+                    "parent_id": "139919212311088",
+                    "content": "Step 1: Define the de Broglie wavelength \u03bb = h/p, where h is Planck's constant and p is the momentum of the object. This will be crucial for determining the quantum number.\nStep 2: Express the relationship between the box length L, the de Broglie wavelength \u03bb, and the quantum number n. In a one-dimensional box, this relationship is given by L = n\u03bb/2, where n is the quantum number we're trying to find.\n",
+                    "current_step": "Step 2: Express the relationship between the box length L, the de Broglie wavelength \u03bb, and the quantum number n. In a one-dimensional box, this relationship is given by L = n\u03bb/2, where n is the quantum number we're trying to find.\n",
+                    "depth": 2,
+                    "value": 0.5,
+                    "state": "expanded",
+                    "visit_sequence": 10,
+                    "is_final": false
+                },
+                {
+                    "question_id": "26",
+                    "node_id": "139919212216928",
+                    "parent_id": "139919212311088",
+                    "content": "Step 1: Define the de Broglie wavelength \u03bb = h/p, where h is Planck's constant and p is the momentum of the object. This will be crucial for determining the quantum number.\nStep 2: Convert all given values to SI units to ensure consistency in our calculations. This includes converting grams to kilograms and centimeters to meters.\n",
+                    "current_step": "Step 2: Convert all given values to SI units to ensure consistency in our calculations. This includes converting grams to kilograms and centimeters to meters.\n",
+                    "depth": 2,
+                    "value": 0.4,
+                    "state": "expanded",
+                    "visit_sequence": 11,
+                    "is_final": false
+                },
+                {
+                    "question_id": "26",
+                    "node_id": "139919212223648",
+                    "parent_id": "139919212219232",
+                    "content": "Step 1: Define the de Broglie wavelength \u03bb = h/p, where h is Planck's constant and p is the momentum of the object. This will be crucial for determining the quantum number.\nStep 2: Express the relationship between the box length L, the de Broglie wavelength \u03bb, and the quantum number n. In a one-dimensional box, this relationship is given by L = n\u03bb/2, where n is the quantum number we're trying to find.\nStep 3: Calculate the momentum p of the object using the given mass and speed. We know that p = mv, where m = 1.0 g = 0.001 kg and v = 1.0 cm/s = 0.01 m/s.\n",
+                    "current_step": "Step 3: Calculate the momentum p of the object using the given mass and speed. We know that p = mv, where m = 1.0 g = 0.001 kg and v = 1.0 cm/s = 0.01 m/s.\n",
+                    "depth": 3,
+                    "value": 0.6,
+                    "state": "expanded",
+                    "visit_sequence": 12,
+                    "is_final": false
+                },
+                {
+                    "question_id": "26",
+                    "node_id": "139919212224320",
+                    "parent_id": "139919212219232",
+                    "content": "Step 1: Define the de Broglie wavelength \u03bb = h/p, where h is Planck's constant and p is the momentum of the object. This will be crucial for determining the quantum number.\nStep 2: Express the relationship between the box length L, the de Broglie wavelength \u03bb, and the quantum number n. In a one-dimensional box, this relationship is given by L = n\u03bb/2, where n is the quantum number we're trying to find.\nStep 3: Determine the de Broglie wavelength \u03bb using the formula \u03bb = h/p. We'll need to use the calculated momentum and Planck's constant h = 6.626 \u00d7 10^-34 J\u00b7s.\n",
+                    "current_step": "Step 3: Determine the de Broglie wavelength \u03bb using the formula \u03bb = h/p. We'll need to use the calculated momentum and Planck's constant h = 6.626 \u00d7 10^-34 J\u00b7s.\n",
+                    "depth": 3,
+                    "value": 0.6,
+                    "state": "expanded",
+                    "visit_sequence": 13,
+                    "is_final": false
+                },
+                {
+                    "question_id": "26",
+                    "node_id": "139919219823376",
+                    "parent_id": "139919212219232",
+                    "content": "Step 1: Define the de Broglie wavelength \u03bb = h/p, where h is Planck's constant and p is the momentum of the object. This will be crucial for determining the quantum number.\nStep 2: Express the relationship between the box length L, the de Broglie wavelength \u03bb, and the quantum number n. In a one-dimensional box, this relationship is given by L = n\u03bb/2, where n is the quantum number we're trying to find.\nStep 3: Rearrange the equation L = n\u03bb/2 to solve for n. This will give us n = 2L/\u03bb, where L is the box length and \u03bb is the de Broglie wavelength we'll calculate.\n",
+                    "current_step": "Step 3: Rearrange the equation L = n\u03bb/2 to solve for n. This will give us n = 2L/\u03bb, where L is the box length and \u03bb is the de Broglie wavelength we'll calculate.\n",
+                    "depth": 3,
+                    "value": 0.6,
+                    "state": "expanded",
+                    "visit_sequence": 14,
+                    "is_final": false
+                },
+                {
+                    "question_id": "26",
+                    "node_id": "139919219828560",
+                    "parent_id": "139919212219232",
+                    "content": "Step 1: Define the de Broglie wavelength \u03bb = h/p, where h is Planck's constant and p is the momentum of the object. This will be crucial for determining the quantum number.\nStep 2: Express the relationship between the box length L, the de Broglie wavelength \u03bb, and the quantum number n. In a one-dimensional box, this relationship is given by L = n\u03bb/2, where n is the quantum number we're trying to find.\nStep 3: Convert the given box length of 1.0 cm to meters, as we'll need consistent units for our calculations. 1.0 cm = 0.01 m.\n",
+                    "current_step": "Step 3: Convert the given box length of 1.0 cm to meters, as we'll need consistent units for our calculations. 1.0 cm = 0.01 m.\n",
+                    "depth": 3,
+                    "value": 0.4,
+                    "state": "expanded",
+                    "visit_sequence": 15,
+                    "is_final": false
+                },
+                {
+                    "question_id": "26",
+                    "node_id": "139919211981152",
+                    "parent_id": "139919212219232",
+                    "content": "Step 1: Define the de Broglie wavelength \u03bb = h/p, where h is Planck's constant and p is the momentum of the object. This will be crucial for determining the quantum number.\nStep 2: Express the relationship between the box length L, the de Broglie wavelength \u03bb, and the quantum number n. In a one-dimensional box, this relationship is given by L = n\u03bb/2, where n is the quantum number we're trying to find.\nStep 3: Outline the steps we'll need to take after calculating \u03bb: substitute the values into the equation n = 2L/\u03bb, perform the calculation, and then express the result in units of 10^26 as requested in the problem statement.\n",
+                    "current_step": "Step 3: Outline the steps we'll need to take after calculating \u03bb: substitute the values into the equation n = 2L/\u03bb, perform the calculation, and then express the result in units of 10^26 as requested in the problem statement.\n",
+                    "depth": 3,
+                    "value": 0.5,
+                    "state": "expanded",
+                    "visit_sequence": 16,
+                    "is_final": false
+                },
+                {
+                    "question_id": "26",
+                    "node_id": "139919212227680",
+                    "parent_id": "139919212223648",
+                    "content": "Step 1: Define the de Broglie wavelength \u03bb = h/p, where h is Planck's constant and p is the momentum of the object. This will be crucial for determining the quantum number.\nStep 2: Express the relationship between the box length L, the de Broglie wavelength \u03bb, and the quantum number n. In a one-dimensional box, this relationship is given by L = n\u03bb/2, where n is the quantum number we're trying to find.\nStep 3: Calculate the momentum p of the object using the given mass and speed. We know that p = mv, where m = 1.0 g = 0.001 kg and v = 1.0 cm/s = 0.01 m/s.\nStep 4: Calculate the momentum p using the values we determined in Step 3. p = mv = (0.001 kg)(0.01 m/s) = 1 \u00d7 10^-5 kg\u00b7m/s.\n",
+                    "current_step": "Step 4: Calculate the momentum p using the values we determined in Step 3. p = mv = (0.001 kg)(0.01 m/s) = 1 \u00d7 10^-5 kg\u00b7m/s.\n",
+                    "depth": 4,
+                    "value": 0.7,
+                    "state": "expanded",
+                    "visit_sequence": 17,
+                    "is_final": false
+                },
+                {
+                    "question_id": "26",
+                    "node_id": "139919213513040",
+                    "parent_id": "139919212223648",
+                    "content": "Step 1: Define the de Broglie wavelength \u03bb = h/p, where h is Planck's constant and p is the momentum of the object. This will be crucial for determining the quantum number.\nStep 2: Express the relationship between the box length L, the de Broglie wavelength \u03bb, and the quantum number n. In a one-dimensional box, this relationship is given by L = n\u03bb/2, where n is the quantum number we're trying to find.\nStep 3: Calculate the momentum p of the object using the given mass and speed. We know that p = mv, where m = 1.0 g = 0.001 kg and v = 1.0 cm/s = 0.01 m/s.\nStep 4: Use the calculated momentum to determine the de Broglie wavelength \u03bb. We can do this by applying the formula \u03bb = h/p, where h is Planck's constant (6.626 \u00d7 10^-34 J\u00b7s).\n",
+                    "current_step": "Step 4: Use the calculated momentum to determine the de Broglie wavelength \u03bb. We can do this by applying the formula \u03bb = h/p, where h is Planck's constant (6.626 \u00d7 10^-34 J\u00b7s).\n",
+                    "depth": 4,
+                    "value": 0.7,
+                    "state": "expanded",
+                    "visit_sequence": 18,
+                    "is_final": false
+                },
+                {
+                    "question_id": "26",
+                    "node_id": "139919220085760",
+                    "parent_id": "139919212223648",
+                    "content": "Step 1: Define the de Broglie wavelength \u03bb = h/p, where h is Planck's constant and p is the momentum of the object. This will be crucial for determining the quantum number.\nStep 2: Express the relationship between the box length L, the de Broglie wavelength \u03bb, and the quantum number n. In a one-dimensional box, this relationship is given by L = n\u03bb/2, where n is the quantum number we're trying to find.\nStep 3: Calculate the momentum p of the object using the given mass and speed. We know that p = mv, where m = 1.0 g = 0.001 kg and v = 1.0 cm/s = 0.01 m/s.\nStep 4: Substitute the known values into the equation L = n\u03bb/2 to create an equation for n. We know L = 1.0 cm = 0.01 m, and we'll use the \u03bb we calculate in the previous step.\n",
+                    "current_step": "Step 4: Substitute the known values into the equation L = n\u03bb/2 to create an equation for n. We know L = 1.0 cm = 0.01 m, and we'll use the \u03bb we calculate in the previous step.\n",
+                    "depth": 4,
+                    "value": 0.7,
+                    "state": "expanded",
+                    "visit_sequence": 19,
+                    "is_final": false
+                },
+                {
+                    "question_id": "26",
+                    "node_id": "139919220222160",
+                    "parent_id": "139919212223648",
+                    "content": "Step 1: Define the de Broglie wavelength \u03bb = h/p, where h is Planck's constant and p is the momentum of the object. This will be crucial for determining the quantum number.\nStep 2: Express the relationship between the box length L, the de Broglie wavelength \u03bb, and the quantum number n. In a one-dimensional box, this relationship is given by L = n\u03bb/2, where n is the quantum number we're trying to find.\nStep 3: Calculate the momentum p of the object using the given mass and speed. We know that p = mv, where m = 1.0 g = 0.001 kg and v = 1.0 cm/s = 0.01 m/s.\nStep 4: Rearrange the equation L = n\u03bb/2 to solve for n. This will give us n = 2L/\u03bb, which we can use once we have calculated \u03bb.\n",
+                    "current_step": "Step 4: Rearrange the equation L = n\u03bb/2 to solve for n. This will give us n = 2L/\u03bb, which we can use once we have calculated \u03bb.\n",
+                    "depth": 4,
+                    "value": 0.7,
+                    "state": "expanded",
+                    "visit_sequence": 20,
+                    "is_final": false
+                },
+                {
+                    "question_id": "26",
+                    "node_id": "139919220222064",
+                    "parent_id": "139919212223648",
+                    "content": "Step 1: Define the de Broglie wavelength \u03bb = h/p, where h is Planck's constant and p is the momentum of the object. This will be crucial for determining the quantum number.\nStep 2: Express the relationship between the box length L, the de Broglie wavelength \u03bb, and the quantum number n. In a one-dimensional box, this relationship is given by L = n\u03bb/2, where n is the quantum number we're trying to find.\nStep 3: Calculate the momentum p of the object using the given mass and speed. We know that p = mv, where m = 1.0 g = 0.001 kg and v = 1.0 cm/s = 0.01 m/s.\nStep 4: Consider the units of our final answer. Since we're asked to express n in units of 10^26, we should be prepared to divide our calculated n by 10^26 to get the final result.\n",
+                    "current_step": "Step 4: Consider the units of our final answer. Since we're asked to express n in units of 10^26, we should be prepared to divide our calculated n by 10^26 to get the final result.\n",
+                    "depth": 4,
+                    "value": 0.7,
+                    "state": "expanded",
+                    "visit_sequence": 21,
+                    "is_final": false
+                },
+                {
+                    "question_id": "26",
+                    "node_id": "139919212222880",
+                    "parent_id": "139919212227680",
+                    "content": "Step 1: Define the de Broglie wavelength \u03bb = h/p, where h is Planck's constant and p is the momentum of the object. This will be crucial for determining the quantum number.\nStep 2: Express the relationship between the box length L, the de Broglie wavelength \u03bb, and the quantum number n. In a one-dimensional box, this relationship is given by L = n\u03bb/2, where n is the quantum number we're trying to find.\nStep 3: Calculate the momentum p of the object using the given mass and speed. We know that p = mv, where m = 1.0 g = 0.001 kg and v = 1.0 cm/s = 0.01 m/s.\nStep 4: Calculate the momentum p using the values we determined in Step 3. p = mv = (0.001 kg)(0.01 m/s) = 1 \u00d7 10^-5 kg\u00b7m/s.\nStep 5: Calculate the de Broglie wavelength \u03bb using the formula \u03bb = h/p. We know h (Planck's constant) is approximately 6.626 \u00d7 10^-34 J\u00b7s, and we calculated p in the previous step.\n",
+                    "current_step": "Step 5: Calculate the de Broglie wavelength \u03bb using the formula \u03bb = h/p. We know h (Planck's constant) is approximately 6.626 \u00d7 10^-34 J\u00b7s, and we calculated p in the previous step.\n",
+                    "depth": 5,
+                    "value": 0.7,
+                    "state": "expanded",
+                    "visit_sequence": 22,
+                    "is_final": false
+                },
+                {
+                    "question_id": "26",
+                    "node_id": "139919212226288",
+                    "parent_id": "139919212227680",
+                    "content": "Step 1: Define the de Broglie wavelength \u03bb = h/p, where h is Planck's constant and p is the momentum of the object. This will be crucial for determining the quantum number.\nStep 2: Express the relationship between the box length L, the de Broglie wavelength \u03bb, and the quantum number n. In a one-dimensional box, this relationship is given by L = n\u03bb/2, where n is the quantum number we're trying to find.\nStep 3: Calculate the momentum p of the object using the given mass and speed. We know that p = mv, where m = 1.0 g = 0.001 kg and v = 1.0 cm/s = 0.01 m/s.\nStep 4: Calculate the momentum p using the values we determined in Step 3. p = mv = (0.001 kg)(0.01 m/s) = 1 \u00d7 10^-5 kg\u00b7m/s.\nStep 5: Use the calculated momentum to determine the de Broglie wavelength \u03bb. This can be done by dividing Planck's constant h by the momentum p: \u03bb = h/p = (6.626 \u00d7 10^-34 J\u00b7s) / (1 \u00d7 10^-5 kg\u00b7m/s).\n",
+                    "current_step": "Step 5: Use the calculated momentum to determine the de Broglie wavelength \u03bb. This can be done by dividing Planck's constant h by the momentum p: \u03bb = h/p = (6.626 \u00d7 10^-34 J\u00b7s) / (1 \u00d7 10^-5 kg\u00b7m/s).\n",
+                    "depth": 5,
+                    "value": 0.7,
+                    "state": "expanded",
+                    "visit_sequence": 23,
+                    "is_final": false
+                },
+                {
+                    "question_id": "26",
+                    "node_id": "139919219974528",
+                    "parent_id": "139919212227680",
+                    "content": "Step 1: Define the de Broglie wavelength \u03bb = h/p, where h is Planck's constant and p is the momentum of the object. This will be crucial for determining the quantum number.\nStep 2: Express the relationship between the box length L, the de Broglie wavelength \u03bb, and the quantum number n. In a one-dimensional box, this relationship is given by L = n\u03bb/2, where n is the quantum number we're trying to find.\nStep 3: Calculate the momentum p of the object using the given mass and speed. We know that p = mv, where m = 1.0 g = 0.001 kg and v = 1.0 cm/s = 0.01 m/s.\nStep 4: Calculate the momentum p using the values we determined in Step 3. p = mv = (0.001 kg)(0.01 m/s) = 1 \u00d7 10^-5 kg\u00b7m/s.\nStep 5: Determine the de Broglie wavelength \u03bb by substituting the known values into the equation \u03bb = h/p. Then, use this wavelength in the equation L = n\u03bb/2 to solve for the quantum number n.\n",
+                    "current_step": "Step 5: Determine the de Broglie wavelength \u03bb by substituting the known values into the equation \u03bb = h/p. Then, use this wavelength in the equation L = n\u03bb/2 to solve for the quantum number n.\n",
+                    "depth": 5,
+                    "value": 0.7,
+                    "state": "expanded",
+                    "visit_sequence": 24,
+                    "is_final": false
+                },
+                {
+                    "question_id": "26",
+                    "node_id": "139919220222112",
+                    "parent_id": "139919212227680",
+                    "content": "Step 1: Define the de Broglie wavelength \u03bb = h/p, where h is Planck's constant and p is the momentum of the object. This will be crucial for determining the quantum number.\nStep 2: Express the relationship between the box length L, the de Broglie wavelength \u03bb, and the quantum number n. In a one-dimensional box, this relationship is given by L = n\u03bb/2, where n is the quantum number we're trying to find.\nStep 3: Calculate the momentum p of the object using the given mass and speed. We know that p = mv, where m = 1.0 g = 0.001 kg and v = 1.0 cm/s = 0.01 m/s.\nStep 4: Calculate the momentum p using the values we determined in Step 3. p = mv = (0.001 kg)(0.01 m/s) = 1 \u00d7 10^-5 kg\u00b7m/s.\nStep 5: Calculate the ratio of the box length L to the de Broglie wavelength \u03bb. This ratio, multiplied by 2, will give us the quantum number n according to the equation L = n\u03bb/2.\n",
+                    "current_step": "Step 5: Calculate the ratio of the box length L to the de Broglie wavelength \u03bb. This ratio, multiplied by 2, will give us the quantum number n according to the equation L = n\u03bb/2.\n",
+                    "depth": 5,
+                    "value": 0.7,
+                    "state": "expanded",
+                    "visit_sequence": 25,
+                    "is_final": false
+                },
+                {
+                    "question_id": "26",
+                    "node_id": "139919212230464",
+                    "parent_id": "139919212227680",
+                    "content": "Step 1: Define the de Broglie wavelength \u03bb = h/p, where h is Planck's constant and p is the momentum of the object. This will be crucial for determining the quantum number.\nStep 2: Express the relationship between the box length L, the de Broglie wavelength \u03bb, and the quantum number n. In a one-dimensional box, this relationship is given by L = n\u03bb/2, where n is the quantum number we're trying to find.\nStep 3: Calculate the momentum p of the object using the given mass and speed. We know that p = mv, where m = 1.0 g = 0.001 kg and v = 1.0 cm/s = 0.01 m/s.\nStep 4: Calculate the momentum p using the values we determined in Step 3. p = mv = (0.001 kg)(0.01 m/s) = 1 \u00d7 10^-5 kg\u00b7m/s.\nStep 5: Rearrange the equation L = n\u03bb/2 to solve for n. We can express this as n = 2L/\u03bb. Then, substitute the known values for L (box length) and the calculated value for \u03bb (de Broglie wavelength) to find n.\n",
+                    "current_step": "Step 5: Rearrange the equation L = n\u03bb/2 to solve for n. We can express this as n = 2L/\u03bb. Then, substitute the known values for L (box length) and the calculated value for \u03bb (de Broglie wavelength) to find n.\n",
+                    "depth": 5,
+                    "value": 0.8,
+                    "state": "expanded",
+                    "visit_sequence": 26,
+                    "is_final": false
+                },
+                {
+                    "question_id": "26",
+                    "node_id": "139919212218464",
+                    "parent_id": "139919212230464",
+                    "content": "Step 1: Define the de Broglie wavelength \u03bb = h/p, where h is Planck's constant and p is the momentum of the object. This will be crucial for determining the quantum number.\nStep 2: Express the relationship between the box length L, the de Broglie wavelength \u03bb, and the quantum number n. In a one-dimensional box, this relationship is given by L = n\u03bb/2, where n is the quantum number we're trying to find.\nStep 3: Calculate the momentum p of the object using the given mass and speed. We know that p = mv, where m = 1.0 g = 0.001 kg and v = 1.0 cm/s = 0.01 m/s.\nStep 4: Calculate the momentum p using the values we determined in Step 3. p = mv = (0.001 kg)(0.01 m/s) = 1 \u00d7 10^-5 kg\u00b7m/s.\nStep 5: Rearrange the equation L = n\u03bb/2 to solve for n. We can express this as n = 2L/\u03bb. Then, substitute the known values for L (box length) and the calculated value for \u03bb (de Broglie wavelength) to find n.\nStep 6: Calculate the de Broglie wavelength \u03bb using the formula \u03bb = h/p. We know h (Planck's constant) is 6.626 \u00d7 10^-34 J\u00b7s, and we calculated p in Step 4. \u03bb = (6.626 \u00d7 10^-34 J\u00b7s) / (1 \u00d7 10^-5 kg\u00b7m/s) = 6.626 \u00d7 10^-29 m.\n",
+                    "current_step": "Step 6: Calculate the de Broglie wavelength \u03bb using the formula \u03bb = h/p. We know h (Planck's constant) is 6.626 \u00d7 10^-34 J\u00b7s, and we calculated p in Step 4. \u03bb = (6.626 \u00d7 10^-34 J\u00b7s) / (1 \u00d7 10^-5 kg\u00b7m/s) = 6.626 \u00d7 10^-29 m.\n",
+                    "depth": 6,
+                    "value": 0.95,
+                    "state": "expanded",
+                    "visit_sequence": 27,
+                    "is_final": false
+                },
+                {
+                    "question_id": "26",
+                    "node_id": "139919212218752",
+                    "parent_id": "139919212230464",
+                    "content": "Step 1: Define the de Broglie wavelength \u03bb = h/p, where h is Planck's constant and p is the momentum of the object. This will be crucial for determining the quantum number.\nStep 2: Express the relationship between the box length L, the de Broglie wavelength \u03bb, and the quantum number n. In a one-dimensional box, this relationship is given by L = n\u03bb/2, where n is the quantum number we're trying to find.\nStep 3: Calculate the momentum p of the object using the given mass and speed. We know that p = mv, where m = 1.0 g = 0.001 kg and v = 1.0 cm/s = 0.01 m/s.\nStep 4: Calculate the momentum p using the values we determined in Step 3. p = mv = (0.001 kg)(0.01 m/s) = 1 \u00d7 10^-5 kg\u00b7m/s.\nStep 5: Rearrange the equation L = n\u03bb/2 to solve for n. We can express this as n = 2L/\u03bb. Then, substitute the known values for L (box length) and the calculated value for \u03bb (de Broglie wavelength) to find n.\nStep 6: Substitute the values for L (box length, 1.0 cm = 0.01 m) and the calculated \u03bb into the equation n = 2L/\u03bb. This gives us n = 2(0.01 m) / (6.626 \u00d7 10^-29 m) = 3.017 \u00d7 10^26.\n",
+                    "current_step": "Step 6: Substitute the values for L (box length, 1.0 cm = 0.01 m) and the calculated \u03bb into the equation n = 2L/\u03bb. This gives us n = 2(0.01 m) / (6.626 \u00d7 10^-29 m) = 3.017 \u00d7 10^26.\n",
+                    "depth": 6,
+                    "value": 1.0,
+                    "state": "expanded",
+                    "visit_sequence": 28,
+                    "is_final": false
+                },
+                {
+                    "question_id": "26",
+                    "node_id": "139919212218752",
+                    "parent_id": "139919212230464",
+                    "content": "Step 1: Define the de Broglie wavelength \u03bb = h/p, where h is Planck's constant and p is the momentum of the object. This will be crucial for determining the quantum number.\nStep 2: Express the relationship between the box length L, the de Broglie wavelength \u03bb, and the quantum number n. In a one-dimensional box, this relationship is given by L = n\u03bb/2, where n is the quantum number we're trying to find.\nStep 3: Calculate the momentum p of the object using the given mass and speed. We know that p = mv, where m = 1.0 g = 0.001 kg and v = 1.0 cm/s = 0.01 m/s.\nStep 4: Calculate the momentum p using the values we determined in Step 3. p = mv = (0.001 kg)(0.01 m/s) = 1 \u00d7 10^-5 kg\u00b7m/s.\nStep 5: Rearrange the equation L = n\u03bb/2 to solve for n. We can express this as n = 2L/\u03bb. Then, substitute the known values for L (box length) and the calculated value for \u03bb (de Broglie wavelength) to find n.\nStep 6: Substitute the values for L (box length, 1.0 cm = 0.01 m) and the calculated \u03bb into the equation n = 2L/\u03bb. This gives us n = 2(0.01 m) / (6.626 \u00d7 10^-29 m) = 3.017 \u00d7 10^26.\n",
+                    "current_step": "Step 6: Substitute the values for L (box length, 1.0 cm = 0.01 m) and the calculated \u03bb into the equation n = 2L/\u03bb. This gives us n = 2(0.01 m) / (6.626 \u00d7 10^-29 m) = 3.017 \u00d7 10^26.\n",
+                    "depth": 6,
+                    "value": 1.0,
+                    "state": "solution",
+                    "visit_sequence": 28,
+                    "is_final": true
+                }
+            ]
+        },
+        "answer": "3"
+    },
+    {
+        "id": "trip_planning_example_5",
+        "prompt": "You are an expert at planning trips. You are given a few constraints regarding the cities to visit and the durations of staying at each city. You are also given the flight information between the cities. Here are a few example tasks and solutions:\n\nTASK: You plan to visit 3 European cities for 7 days in total. You only take direct flights to commute between cities. You want to spend 4 days in Berlin. You would like to visit Venice for 3 days. You are going to attend a wedding in Venice between day 5 and day 7. You want to spend 2 days in Tallinn.\n\nHere are the cities that have direct flights:\nBerlin and Venice, Tallinn and Berlin.\n\nFind a trip plan of visiting the cities for 7 days by taking direct flights to commute between them.\nSOLUTION: Here is the trip plan for visiting the 3 European cities for 7 days:\n\n**Day 1-2:** Arriving in Tallinn and visit Tallinn for 2 days.\n**Day 2:** Fly from Tallinn to Berlin.\n**Day 2-5:** Visit Berlin for 4 days.\n**Day 5:** Fly from Berlin to Venice.\n**Day 5-7:** Visit Venice for 3 days.\n\nTASK: You plan to visit 3 European cities for 14 days in total. You only take direct flights to commute between cities. You plan to stay in London for 4 days. You plan to stay in Bucharest for 5 days. You want to meet a friend in Bucharest between day 10 and day 14. You would like to visit Reykjavik for 7 days.\n\nHere are the cities that have direct flights:\nLondon and Bucharest, Reykjavik and London.\n\nFind a trip plan of visiting the cities for 14 days by taking direct flights to commute between them.\nSOLUTION: Here is the trip plan for visiting the 3 European cities for 14 days:\n\n**Day 1-7:** Arriving in Reykjavik and visit Reykjavik for 7 days.\n**Day 7:** Fly from Reykjavik to London.\n**Day 7-10:** Visit London for 4 days.\n**Day 10:** Fly from London to Bucharest.\n**Day 10-14:** Visit Bucharest for 5 days.\n\nTASK: You plan to visit 3 European cities for 12 days in total. You only take direct flights to commute between cities. You want to spend 4 days in Seville. You plan to stay in Valencia for 5 days. You have to attend a workshop in Valencia between day 8 and day 12. You plan to stay in Manchester for 5 days.\n\nHere are the cities that have direct flights:\nManchester and Seville, Seville and Valencia.\n\nFind a trip plan of visiting the cities for 12 days by taking direct flights to commute between them.\nSOLUTION: Here is the trip plan for visiting the 3 European cities for 12 days:\n\n**Day 1-5:** Arriving in Manchester and visit Manchester for 5 days.\n**Day 5:** Fly from Manchester to Seville.\n**Day 5-8:** Visit Seville for 4 days.\n**Day 8:** Fly from Seville to Valencia.\n**Day 8-12:** Visit Valencia for 5 days.\n\nTASK: You plan to visit 3 European cities for 8 days in total. You only take direct flights to commute between cities. You plan to stay in Istanbul for 2 days. You want to spend 3 days in Venice. You have to attend a workshop in Venice between day 1 and day 3. You would like to visit Valencia for 5 days.\n\nHere are the cities that have direct flights:\nVenice and Istanbul, Istanbul and Valencia.\n\nFind a trip plan of visiting the cities for 8 days by taking direct flights to commute between them.\nSOLUTION: Here is the trip plan for visiting the 3 European cities for 8 days:\n\n**Day 1-3:** Arriving in Venice and visit Venice for 3 days.\n**Day 3:** Fly from Venice to Istanbul.\n**Day 3-4:** Visit Istanbul for 2 days.\n**Day 4:** Fly from Istanbul to Valencia.\n**Day 4-8:** Visit Valencia for 5 days.\n\nTASK: You plan to visit 3 European cities for 11 days in total. You only take direct flights to commute between cities. You want to spend 2 days in Porto. You want to spend 4 days in Oslo. You would like to visit Split for 7 days. You plan to visit relatives in Split between day 5 and day 11.\n\nHere are the cities that have direct flights:\nPorto and Oslo, Oslo and Split.\n\nFind a trip plan of visiting the cities for 11 days by taking direct flights to commute between them.\nSOLUTION: Here is the trip plan for visiting the 3 European cities for 11 days:\n\n**Day 1-2:** Arriving in Porto and visit Porto for 2 days.\n**Day 2:** Fly from Porto to Oslo.\n**Day 2-5:** Visit Oslo for 4 days.\n**Day 5:** Fly from Oslo to Split.\n**Day 5-11:** Visit Split for 7 days.\n\nTASK: You plan to visit 3 European cities for 16 days in total. You only take direct flights to commute between cities. You plan to stay in Oslo for 6 days. You plan to stay in Porto for 7 days. You would like to visit Dubrovnik for 5 days. During day 12 and day 16, you have to attend a conference in Dubrovnik.\n\nHere are the cities that have direct flights:\nOslo and Dubrovnik, Porto and Oslo.\n\nFind a trip plan of visiting the cities for 16 days by taking direct flights to commute between them.\nSOLUTION:",
+        "response": "Here is the trip plan for visiting the 3 European cities for 16 days:\n\n**Day 1-7:** Arriving in Porto and visit Porto for 7 days.\n**Day 7:** Fly from Porto to Oslo.\n**Day 7-12:** Visit Oslo for 6 days.\n**Day 12:** Fly from Oslo to Dubrovnik.\n**Day 12-16:** Visit Dubrovnik for 5 days.\n\nThis plan ensures that you spend the required time in each city (7 days in Porto, 6 days in Oslo, and 5 days in Dubrovnik) and allows you to attend the conference in Dubrovnik between day 12 and day 16. The plan also follows the given direct flight routes between the cities.",
+        "parsed_plan": [
+            [
+                "Porto",
+                7
+            ],
+            [
+                "Oslo",
+                6
+            ],
+            [
+                "Dubrovnik",
+                5
+            ]
+        ],
+        "golden_plan": "Here is the trip plan for visiting the 3 European cities for 16 days:\n\n**Day 1-7:** Arriving in Porto and visit Porto for 7 days.\n**Day 7:** Fly from Porto to Oslo.\n**Day 7-12:** Visit Oslo for 6 days.\n**Day 12:** Fly from Oslo to Dubrovnik.\n**Day 12-16:** Visit Dubrovnik for 5 days.",
+        "cities": "Porto**Oslo**Dubrovnik",
+        "durations": "7**6**5",
+        "score": 1.0,
+        "accurate": true,
+        "trajectory_data": {
+            "question_id": "trip_planning_example_5",
+            "problem_prompt": "You are an expert at planning trips. You are given a few constraints regarding the cities to visit and the durations of staying at each city. You are also given the flight information between the cities. Here are a few example tasks and solutions:\n\nTASK: You plan to visit 3 European cities for 7 days in total. You only take direct flights to commute between cities. You want to spend 4 days in Berlin. You would like to visit Venice for 3 days. You are going to attend a wedding in Venice between day 5 and day 7. You want to spend 2 days in Tallinn.\n\nHere are the cities that have direct flights:\nBerlin and Venice, Tallinn and Berlin.\n\nFind a trip plan of visiting the cities for 7 days by taking direct flights to commute between them.\nSOLUTION: Here is the trip plan for visiting the 3 European cities for 7 days:\n\n**Day 1-2:** Arriving in Tallinn and visit Tallinn for 2 days.\n**Day 2:** Fly from Tallinn to Berlin.\n**Day 2-5:** Visit Berlin for 4 days.\n**Day 5:** Fly from Berlin to Venice.\n**Day 5-7:** Visit Venice for 3 days.\n\nTASK: You plan to visit 3 European cities for 14 days in total. You only take direct flights to commute between cities. You plan to stay in London for 4 days. You plan to stay in Bucharest for 5 days. You want to meet a friend in Bucharest between day 10 and day 14. You would like to visit Reykjavik for 7 days.\n\nHere are the cities that have direct flights:\nLondon and Bucharest, Reykjavik and London.\n\nFind a trip plan of visiting the cities for 14 days by taking direct flights to commute between them.\nSOLUTION: Here is the trip plan for visiting the 3 European cities for 14 days:\n\n**Day 1-7:** Arriving in Reykjavik and visit Reykjavik for 7 days.\n**Day 7:** Fly from Reykjavik to London.\n**Day 7-10:** Visit London for 4 days.\n**Day 10:** Fly from London to Bucharest.\n**Day 10-14:** Visit Bucharest for 5 days.\n\nTASK: You plan to visit 3 European cities for 12 days in total. You only take direct flights to commute between cities. You want to spend 4 days in Seville. You plan to stay in Valencia for 5 days. You have to attend a workshop in Valencia between day 8 and day 12. You plan to stay in Manchester for 5 days.\n\nHere are the cities that have direct flights:\nManchester and Seville, Seville and Valencia.\n\nFind a trip plan of visiting the cities for 12 days by taking direct flights to commute between them.\nSOLUTION: Here is the trip plan for visiting the 3 European cities for 12 days:\n\n**Day 1-5:** Arriving in Manchester and visit Manchester for 5 days.\n**Day 5:** Fly from Manchester to Seville.\n**Day 5-8:** Visit Seville for 4 days.\n**Day 8:** Fly from Seville to Valencia.\n**Day 8-12:** Visit Valencia for 5 days.\n\nTASK: You plan to visit 3 European cities for 8 days in total. You only take direct flights to commute between cities. You plan to stay in Istanbul for 2 days. You want to spend 3 days in Venice. You have to attend a workshop in Venice between day 1 and day 3. You would like to visit Valencia for 5 days.\n\nHere are the cities that have direct flights:\nVenice and Istanbul, Istanbul and Valencia.\n\nFind a trip plan of visiting the cities for 8 days by taking direct flights to commute between them.\nSOLUTION: Here is the trip plan for visiting the 3 European cities for 8 days:\n\n**Day 1-3:** Arriving in Venice and visit Venice for 3 days.\n**Day 3:** Fly from Venice to Istanbul.\n**Day 3-4:** Visit Istanbul for 2 days.\n**Day 4:** Fly from Istanbul to Valencia.\n**Day 4-8:** Visit Valencia for 5 days.\n\nTASK: You plan to visit 3 European cities for 11 days in total. You only take direct flights to commute between cities. You want to spend 2 days in Porto. You want to spend 4 days in Oslo. You would like to visit Split for 7 days. You plan to visit relatives in Split between day 5 and day 11.\n\nHere are the cities that have direct flights:\nPorto and Oslo, Oslo and Split.\n\nFind a trip plan of visiting the cities for 11 days by taking direct flights to commute between them.\nSOLUTION: Here is the trip plan for visiting the 3 European cities for 11 days:\n\n**Day 1-2:** Arriving in Porto and visit Porto for 2 days.\n**Day 2:** Fly from Porto to Oslo.\n**Day 2-5:** Visit Oslo for 4 days.\n**Day 5:** Fly from Oslo to Split.\n**Day 5-11:** Visit Split for 7 days.\n\nTASK: You plan to visit 3 European cities for 16 days in total. You only take direct flights to commute between cities. You plan to stay in Oslo for 6 days. You plan to stay in Porto for 7 days. You would like to visit Dubrovnik for 5 days. During day 12 and day 16, you have to attend a conference in Dubrovnik.\n\nHere are the cities that have direct flights:\nOslo and Dubrovnik, Porto and Oslo.\n\nFind a trip plan of visiting the cities for 16 days by taking direct flights to commute between them.\nSOLUTION:",
+            "algorithm": "bfs",
+            "branch": 5,
+            "select_branch": 2,
+            "max_depth": 8,
+            "end_gate": 0.96,
+            "prune_depth": 3,
+            "sub_low": 0.6,
+            "trajectory": [
+                {
+                    "question_id": "trip_planning_example_5",
+                    "node_id": "140339613950576",
+                    "parent_id": null,
+                    "content": "",
+                    "current_step": "",
+                    "depth": 0,
+                    "value": 0.0,
+                    "state": "root",
+                    "visit_sequence": 0,
+                    "is_final": false
+                },
+                {
+                    "question_id": "trip_planning_example_5",
+                    "node_id": "140338849121776",
+                    "parent_id": "140339613950576",
+                    "content": "Step 1: Analyze the given constraints and requirements for the trip plan.\n",
+                    "current_step": "Step 1: Analyze the given constraints and requirements for the trip plan.\n",
+                    "depth": 1,
+                    "value": 0.0,
+                    "state": "expanded",
+                    "visit_sequence": 1,
+                    "is_final": false
+                },
+                {
+                    "question_id": "trip_planning_example_5",
+                    "node_id": "140338849132672",
+                    "parent_id": "140339613950576",
+                    "content": "Step 1: Determine the order of cities to visit based on the flight connections and the conference schedule in Dubrovnik.\n",
+                    "current_step": "Step 1: Determine the order of cities to visit based on the flight connections and the conference schedule in Dubrovnik.\n",
+                    "depth": 1,
+                    "value": 0.3,
+                    "state": "expanded",
+                    "visit_sequence": 2,
+                    "is_final": false
+                },
+                {
+                    "question_id": "trip_planning_example_5",
+                    "node_id": "140338849126864",
+                    "parent_id": "140339613950576",
+                    "content": "Step 1: Start the trip plan by arriving in Porto and staying there for 7 days.\n",
+                    "current_step": "Step 1: Start the trip plan by arriving in Porto and staying there for 7 days.\n",
+                    "depth": 1,
+                    "value": 0.7,
+                    "state": "expanded",
+                    "visit_sequence": 3,
+                    "is_final": false
+                },
+                {
+                    "question_id": "trip_planning_example_5",
+                    "node_id": "140338849122544",
+                    "parent_id": "140339613950576",
+                    "content": "Step 1: Begin by visiting Oslo for 6 days as the first destination of the trip.\n",
+                    "current_step": "Step 1: Begin by visiting Oslo for 6 days as the first destination of the trip.\n",
+                    "depth": 1,
+                    "value": 0.7,
+                    "state": "expanded",
+                    "visit_sequence": 4,
+                    "is_final": false
+                },
+                {
+                    "question_id": "trip_planning_example_5",
+                    "node_id": "140338849120864",
+                    "parent_id": "140339613950576",
+                    "content": "Step 1: Consider the conference in Dubrovnik (days 12-16) as a fixed point and plan the other city visits around it.\n",
+                    "current_step": "Step 1: Consider the conference in Dubrovnik (days 12-16) as a fixed point and plan the other city visits around it.\n",
+                    "depth": 1,
+                    "value": 0.3,
+                    "state": "expanded",
+                    "visit_sequence": 5,
+                    "is_final": false
+                },
+                {
+                    "question_id": "trip_planning_example_5",
+                    "node_id": "140338849134544",
+                    "parent_id": "140338849126864",
+                    "content": "Step 1: Start the trip plan by arriving in Porto and staying there for 7 days.\nStep 2: On day 7, fly from Porto to Oslo.\n",
+                    "current_step": "Step 2: On day 7, fly from Porto to Oslo.\n",
+                    "depth": 2,
+                    "value": 0.4,
+                    "state": "expanded",
+                    "visit_sequence": 6,
+                    "is_final": false
+                },
+                {
+                    "question_id": "trip_planning_example_5",
+                    "node_id": "140338849123408",
+                    "parent_id": "140338849126864",
+                    "content": "Step 1: Start the trip plan by arriving in Porto and staying there for 7 days.\nStep 2: Stay in Porto for 7 days, from day 1 to day 7.\n",
+                    "current_step": "Step 2: Stay in Porto for 7 days, from day 1 to day 7.\n",
+                    "depth": 2,
+                    "value": 0.4,
+                    "state": "expanded",
+                    "visit_sequence": 7,
+                    "is_final": false
+                },
+                {
+                    "question_id": "trip_planning_example_5",
+                    "node_id": "140338849128112",
+                    "parent_id": "140338849126864",
+                    "content": "Step 1: Start the trip plan by arriving in Porto and staying there for 7 days.\nStep 2: After the stay in Porto, travel to Oslo on day 8 and spend 6 days there.\n",
+                    "current_step": "Step 2: After the stay in Porto, travel to Oslo on day 8 and spend 6 days there.\n",
+                    "depth": 2,
+                    "value": 0.6,
+                    "state": "expanded",
+                    "visit_sequence": 8,
+                    "is_final": false
+                },
+                {
+                    "question_id": "trip_planning_example_5",
+                    "node_id": "140338849127584",
+                    "parent_id": "140338849126864",
+                    "content": "Step 1: Start the trip plan by arriving in Porto and staying there for 7 days.\nStep 2: Plan to visit Oslo from day 8 to day 13, following the stay in Porto.\n",
+                    "current_step": "Step 2: Plan to visit Oslo from day 8 to day 13, following the stay in Porto.\n",
+                    "depth": 2,
+                    "value": 0.5,
+                    "state": "expanded",
+                    "visit_sequence": 9,
+                    "is_final": false
+                },
+                {
+                    "question_id": "trip_planning_example_5",
+                    "node_id": "140338849121824",
+                    "parent_id": "140338849126864",
+                    "content": "Step 1: Start the trip plan by arriving in Porto and staying there for 7 days.\nStep 2: Schedule the flight from Porto to Oslo for the morning of day 8, allowing for a full 6-day stay in Oslo.\n",
+                    "current_step": "Step 2: Schedule the flight from Porto to Oslo for the morning of day 8, allowing for a full 6-day stay in Oslo.\n",
+                    "depth": 2,
+                    "value": 0.6,
+                    "state": "expanded",
+                    "visit_sequence": 10,
+                    "is_final": false
+                },
+                {
+                    "question_id": "trip_planning_example_5",
+                    "node_id": "140338849125328",
+                    "parent_id": "140338849128112",
+                    "content": "Step 1: Start the trip plan by arriving in Porto and staying there for 7 days.\nStep 2: After the stay in Porto, travel to Oslo on day 8 and spend 6 days there.\nStep 3: On day 14, fly from Oslo to Dubrovnik for the final leg of the trip.\n",
+                    "current_step": "Step 3: On day 14, fly from Oslo to Dubrovnik for the final leg of the trip.\n",
+                    "depth": 3,
+                    "value": 0.8,
+                    "state": "expanded",
+                    "visit_sequence": 11,
+                    "is_final": false
+                },
+                {
+                    "question_id": "trip_planning_example_5",
+                    "node_id": "140338849127344",
+                    "parent_id": "140338849128112",
+                    "content": "Step 1: Start the trip plan by arriving in Porto and staying there for 7 days.\nStep 2: After the stay in Porto, travel to Oslo on day 8 and spend 6 days there.\nStep 3: After the 6-day stay in Oslo, which ends on day 13, take a flight to Dubrovnik on day 14.\n",
+                    "current_step": "Step 3: After the 6-day stay in Oslo, which ends on day 13, take a flight to Dubrovnik on day 14.\n",
+                    "depth": 3,
+                    "value": 0.7,
+                    "state": "expanded",
+                    "visit_sequence": 12,
+                    "is_final": false
+                },
+                {
+                    "question_id": "trip_planning_example_5",
+                    "node_id": "140338849122016",
+                    "parent_id": "140338849128112",
+                    "content": "Step 1: Start the trip plan by arriving in Porto and staying there for 7 days.\nStep 2: After the stay in Porto, travel to Oslo on day 8 and spend 6 days there.\nStep 3: Depart from Oslo on the morning of day 14 and arrive in Dubrovnik, allowing for a 5-day stay to attend the conference.\n",
+                    "current_step": "Step 3: Depart from Oslo on the morning of day 14 and arrive in Dubrovnik, allowing for a 5-day stay to attend the conference.\n",
+                    "depth": 3,
+                    "value": 0.9,
+                    "state": "expanded",
+                    "visit_sequence": 13,
+                    "is_final": false
+                },
+                {
+                    "question_id": "trip_planning_example_5",
+                    "node_id": "140338849128208",
+                    "parent_id": "140338849128112",
+                    "content": "Step 1: Start the trip plan by arriving in Porto and staying there for 7 days.\nStep 2: After the stay in Porto, travel to Oslo on day 8 and spend 6 days there.\nStep 3: Following the Oslo visit, travel to Dubrovnik on day 14, arriving in time for the conference starting on day 12 of the overall trip.\n",
+                    "current_step": "Step 3: Following the Oslo visit, travel to Dubrovnik on day 14, arriving in time for the conference starting on day 12 of the overall trip.\n",
+                    "depth": 3,
+                    "value": 0.6,
+                    "state": "expanded",
+                    "visit_sequence": 14,
+                    "is_final": false
+                },
+                {
+                    "question_id": "trip_planning_example_5",
+                    "node_id": "140338849123696",
+                    "parent_id": "140338849128112",
+                    "content": "Step 1: Start the trip plan by arriving in Porto and staying there for 7 days.\nStep 2: After the stay in Porto, travel to Oslo on day 8 and spend 6 days there.\nStep 3: Conclude the Oslo portion of the trip on day 13 and fly to Dubrovnik on day 14, ensuring arrival before the conference begins.\n",
+                    "current_step": "Step 3: Conclude the Oslo portion of the trip on day 13 and fly to Dubrovnik on day 14, ensuring arrival before the conference begins.\n",
+                    "depth": 3,
+                    "value": 0.7,
+                    "state": "expanded",
+                    "visit_sequence": 15,
+                    "is_final": false
+                },
+                {
+                    "question_id": "trip_planning_example_5",
+                    "node_id": "140338849128928",
+                    "parent_id": "140338849122016",
+                    "content": "Step 1: Start the trip plan by arriving in Porto and staying there for 7 days.\nStep 2: After the stay in Porto, travel to Oslo on day 8 and spend 6 days there.\nStep 3: Depart from Oslo on the morning of day 14 and arrive in Dubrovnik, allowing for a 5-day stay to attend the conference.\nStep 4: Finalize the trip plan by confirming the exact dates for each city: - Porto: Day 1-7 (7 days) - Oslo: Day 8-13 (6 days) - Dubrovnik: Day 14-18 (5 days)\n",
+                    "current_step": "Step 4: Finalize the trip plan by confirming the exact dates for each city: - Porto: Day 1-7 (7 days) - Oslo: Day 8-13 (6 days) - Dubrovnik: Day 14-18 (5 days)\n",
+                    "depth": 4,
+                    "value": 0.95,
+                    "state": "expanded",
+                    "visit_sequence": 16,
+                    "is_final": false
+                },
+                {
+                    "question_id": "trip_planning_example_5",
+                    "node_id": "140338849122592",
+                    "parent_id": "140338849122016",
+                    "content": "Step 1: Start the trip plan by arriving in Porto and staying there for 7 days.\nStep 2: After the stay in Porto, travel to Oslo on day 8 and spend 6 days there.\nStep 3: Depart from Oslo on the morning of day 14 and arrive in Dubrovnik, allowing for a 5-day stay to attend the conference.\nStep 4: Check if there are any visa requirements for traveling between these cities and start the application process if necessary.\n",
+                    "current_step": "Step 4: Check if there are any visa requirements for traveling between these cities and start the application process if necessary.\n",
+                    "depth": 4,
+                    "value": 1.0,
+                    "state": "expanded",
+                    "visit_sequence": 17,
+                    "is_final": false
+                },
+                {
+                    "question_id": "trip_planning_example_5",
+                    "node_id": "140338849122592",
+                    "parent_id": "140338849122016",
+                    "content": "Step 1: Start the trip plan by arriving in Porto and staying there for 7 days.\nStep 2: After the stay in Porto, travel to Oslo on day 8 and spend 6 days there.\nStep 3: Depart from Oslo on the morning of day 14 and arrive in Dubrovnik, allowing for a 5-day stay to attend the conference.\nStep 4: Check if there are any visa requirements for traveling between these cities and start the application process if necessary.\n",
+                    "current_step": "Step 4: Check if there are any visa requirements for traveling between these cities and start the application process if necessary.\n",
+                    "depth": 4,
+                    "value": 1.0,
+                    "state": "solution",
+                    "visit_sequence": 17,
+                    "is_final": true
+                }
+            ]
+        }
+    }
+];
+
+
+
+
+        function visualize() {
+            const indexInput = document.getElementById('index-input');
+            const index = parseInt(indexInput.value);
+
+
+            if (index < 0 || index >= jsonData.length) {
+                alert(`Invalid index. Please choose an index between 0 and ${jsonData.length - 1}.`);
+                return;
+            }
+            const selectedData = jsonData[index];
+            createVisualization(selectedData);
+        }
+
+
+        function createVisualization(data) {
+            // Clear previous chart
+            d3.select("#tree-container").html("");
+
+
+            // Set up the dimensions and margins of the diagram
+            const margin = {top: 20, right: 90, bottom: 20, left: 90};
+            const width = window.innerWidth - margin.left - margin.right;
+            const height = window.innerHeight - margin.top - margin.bottom - 300; // Adjusted for prompt and response boxes
+
+
+            // Append the svg object to the body of the page
+            const svg = d3.select("#tree-container").append("svg")
+                .attr("width", width + margin.right + margin.left)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", `translate(${margin.left},${margin.top})`);
+
+
+            // Create a tree layout
+            const treeLayout = d3.tree().size([height, width]);
+
+
+            // Create the root node
+            const root = d3.stratify()
+                .id(d => d.node_id)
+                .parentId(d => d.parent_id)
+                (data.trajectory_data.trajectory);
+
+
+            // Assign the data to the tree layout
+            const treeData = treeLayout(root);
+
+
+            // Create links
+            const link = svg.selectAll(".link")
+                .data(treeData.links())
+                .enter().append("path")
+                .attr("class", "link")
+                .attr("d", d3.linkHorizontal()
+                    .x(d => d.y)
+                    .y(d => d.x));
+
+
+            // Create nodes
+            const node = svg.selectAll(".node")
+                .data(treeData.descendants())
+                .enter().append("g")
+                .attr("class", d => "node" + (d.children ? " node--internal" : " node--leaf"))
+                .attr("transform", d => `translate(${d.y},${d.x})`);
+
+
+            // Create a color scale for node states
+            const colorScale = d3.scaleOrdinal()
+                .domain(["root", "expanded", "solution", "evaluated", "pruned"])
+                .range(["yellow", "#2196F3", "green", "#9C27B0", "#F44336"]);
+
+
+            // Add circles to the nodes
+            node.append("circle")
+                .attr("r", 10)
+                .style("fill", d => colorScale(d.data.state));
+
+
+            // Add labels to the nodes (now showing value instead of node_id)
+            node.append("text")
+                .attr("dy", ".35em")
+                .attr("x", d => d.children ? -13 : 13)
+                .style("text-anchor", d => d.children ? "end" : "start")
+                .text(d => d.data.value.toFixed(2));
+
+
+            // Create a tooltip
+            const tooltip = d3.select("body").append("div")
+                .attr("class", "tooltip")
+                .style("opacity", 0);
+
+
+            // Add interactivity
+            node.on("mouseover", function(event, d) {
+                tooltip.transition()
+                    .duration(200)
+                    .style("opacity", .9);
+                tooltip.html(`Depth: ${d.data.depth}<br>
+                              State: ${d.data.state}<br>
+                              Value: ${d.data.value}<br>
+                              Current Step: ${d.data.current_step}`)
+                    .style("left", (event.pageX + 10) + "px")
+                    .style("top", (event.pageY - 28) + "px");
+            })
+            .on("mouseout", function(d) {
+                tooltip.transition()
+                    .duration(500)
+                    .style("opacity", 0);
+            });
+
+
+            // Add zoom functionality
+            const zoom = d3.zoom()
+                .scaleExtent([0.1, 10])
+                .on("zoom", zoomed);
+
+
+            svg.call(zoom);
+
+
+            function zoomed(event) {
+                svg.attr("transform", event.transform);
+            }
+
+
+            // Determine which fields to use for prompt and response
+            const promptText = data.prompt || data.content || "Prompt/Content not available";
+            const responseText = data.response || data.summary || "Response/Summary not available";
+
+
+            // Add problem prompt at the top
+            d3.select("#prompt-container")
+                .html(`<strong>Problem Prompt:</strong><br>${promptText}`);
+
+
+            // Add final response and accuracy at the bottom
+            d3.select("#response-container")
+                .html(`<strong>Final Response:</strong><br>${responseText}<br><br>
+                       <strong>Accuracy:</strong> ${data.accurate !== undefined ? (data.accurate ? "Correct" : "Incorrect") : "Accuracy not available"}`);
+        }
+
+
+        // Initialize visualization with the first example
+        visualize();
+    </script>
+</body>
+</html>
+
+
+
+
